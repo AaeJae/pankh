@@ -151,42 +151,6 @@ class _SoundQuizScreenState extends State<SoundQuizScreen> {
   //// end COUNTER
 
 
-  //// BIRD GRID OPTIONS
-  Widget _buildBirdGrid() {
-    // Translucent images with text overlay
-    return GridView.count(
-      crossAxisCount: 2,
-      padding: const EdgeInsets.all(20),
-      crossAxisSpacing: 15,
-      mainAxisSpacing: 15,
-      children: [
-        _birdOption("Indian Roller", "assets/images/roller.jpg"),
-        _birdOption("Orange Minivet", "assets/images/minivet.jpg"),
-        _birdOption("House Sparrow", "assets/images/sparrow.jpg"),
-        _birdOption("Hummingbird", "assets/images/hummingBird.png"),
-      ],
-    );
-  }
-  Widget _birdOption(String name, String imgPath) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        image: DecorationImage(
-          image: AssetImage(imgPath),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            Colors.white.withOpacity(0.6), // Translucency effect
-            BlendMode.screen,
-          ),
-        ),
-      ),
-      child: Center(
-        child: UiHelper.CustomText(text: name, color: AppColors.colPurple, fontSize: 20, textAlign: TextAlign.center, fontFamily: "KantumruyPro", fontWeight: FontWeight.bold)
-      ),
-    );
-  }
-  //// end BIRD GRID OPTIONS
-
   //// GROUPED AUDIO PLAYER
   Widget _buildGroupedAudioPlayer() {
     return Column(
