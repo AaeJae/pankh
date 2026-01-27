@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../../widgets/uihelper.dart';
-import 'package:pankh/domain/constants/appColors.dart';
-import '../../../widgets/widbotmenu.dart';
-import '../../../widgets/widheader.dart';
-import '../quizscreen/soundquizscreen.dart';
+import 'package:pankh/constants/appTokens.dart';
+import '../../../widgets/widBotMenu.dart';
+import '../../../widgets/widHeader.dart';
+import 'package:pankh/screens/quizscreen/quizcontrollerscreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,11 +16,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0; // 0 = Home selected by default
   int? expandedIndex;
+
   void onItemTapped(int index) {
     if (index == 4) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const SoundQuizScreen()),
+        MaterialPageRoute(
+          builder: (context) => const QuizControllerScreen(), // No data passed
+        ),
       );
     } else {
       setState(() {

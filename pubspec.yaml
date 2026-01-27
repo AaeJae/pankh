@@ -33,6 +33,17 @@ dependencies:
   carousel_slider: ^5.1.1
   flutter_svg: ^2.0.9
   audioplayers: ^5.2.1
+  google_fonts: ^6.1.0
+  # Core Firebase (Required for everything)
+  firebase_core: ^3.0.0
+  # For User Login, XP, and Profiles
+  firebase_auth: ^5.0.0
+  # For storing Bird Data, Leaderboards, and Community posts
+  cloud_firestore: ^5.0.0
+  # For tracking how users use your app (Free/Unlimited)
+  firebase_analytics: ^11.0.0
+  # For loading bird images from the web efficiently
+  cached_network_image: ^3.3.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -82,9 +93,10 @@ flutter:
         - asset: assets/fonts/KantumruyPro-Regular.ttf
         - asset: assets/fonts/KantumruyPro-SemiBold.ttf
         - asset: assets/fonts/KantumruyPro-Thin.ttf
-    - family: Samkaran
+    - family: Laila
       fonts:
-       - asset: assets/fonts/Samkaran.ttf
+        - asset: assets/fonts/Laila-Bold.ttf
+
 
 
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/uihelper.dart'; // Ensure correct path to your helper
-import 'package:pankh/domain/constants/appColors.dart';
+import 'package:pankh/constants/appTokens.dart';
 
 class WidHeader extends StatelessWidget implements PreferredSizeWidget {
   const WidHeader({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'uihelper.dart'; // Ensure correct path
-import 'package:pankh/domain/constants/appColors.dart';
+import 'package:pankh/constants/appTokens.dart';
 
 class WidBotMenu extends StatelessWidget {
   final int selectedIndex;

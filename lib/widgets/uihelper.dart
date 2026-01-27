@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../domain/constants/appColors.dart';
+import '../constants/appTokens.dart';
 
 class UiHelper {
   static Widget CustomImage({
@@ -58,16 +58,26 @@ class UiHelper {
     double? width,
     BoxFit? fit,
     Color? color,
+    double? opacity, // 1. Add this parameter
   }) {
-    return SvgPicture.asset(
+    Widget svg = SvgPicture.asset(
       "assets/svg/$img",
       height: height,
       width: width,
-      fit: fit ?? BoxFit.contain, // Contain is usually safer for SVGs
+      fit: fit ?? BoxFit.contain,
       colorFilter: color != null
           ? ColorFilter.mode(color, BlendMode.srcIn)
           : null,
     );
+
+    // 2. Wrap with Opacity if needed
+    if (opacity != null) {
+      return Opacity(
+        opacity: opacity,
+        child: svg,
+      );
+    }
+    return svg;
   }
 
 
