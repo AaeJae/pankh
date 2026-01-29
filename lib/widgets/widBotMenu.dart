@@ -13,96 +13,102 @@ class WidBotMenu extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
+    // Determine screen width for consistency
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return MediaQuery.removePadding(
-        context: context,
-        removeBottom: true, // This forces the widget to ignore the system's bottom gap
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          height: 150,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            clipBehavior: Clip.none,
-            children: [
+      context: context,
+      removeBottom: true,
+      child: Container(
+        color: Colors.transparent,
+        width: screenWidth, // Ensures the stack has a full-width reference point
+        height: 150,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          clipBehavior: Clip.none,
+          children: [
 
-          // 1. THE FLOATING PURPLE MENU BAR
-          Positioned(
-            bottom: 0, // Lifted up to show the tree graphics beneath it
-            left: 20,
-            right: 20,
-            child: Container(
-              height: 70,
-              decoration: BoxDecoration(
-                color: AppColors.colPurpleSecondary,
-                borderRadius: BorderRadius.circular(40),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavIcon("iconHome.png", "Home", 0),
-                  _buildNavIcon("iconQuiz.png", "Quizzes", 1),
-                  const SizedBox(width: 60), // Gap for Blitz
-                  _buildNavIcon("iconGroup.png", "Adda", 2),
-                  _buildNavIcon("iconBuy.png", "Buy", 3),
-                ],
+            // 1. THE TREE GRAPHICS (Layered at the bottom)
+            // Balanced left/right to 0 to span the screen perfectly
+            Positioned(
+              child: IgnorePointer(
+                child: UiHelper.CustomImage(
+                  img: "imgBotGraphics.png",
+                  width: screenWidth,
+                  fit: BoxFit.fitWidth,
+                ),
               ),
             ),
-          ),
 
-          // 2. THE TREE GRAPHICS (Layered ON TOP, flush to the screen edge)
-          Positioned(
-            bottom: -25, // This sits perfectly on the bottom edge
-            left: 0,
-            right: 0,
-            child: IgnorePointer(
-              child: UiHelper.CustomImage(
-                img: "imgBotGraphics.png",
-                width: MediaQuery.of(context).size.width,
-                fit: BoxFit.fitWidth,
+            // 2. THE FLOATING MENU BAR
+            Positioned(
+              bottom: 30, // Adjusted slightly so it doesn't hit the very bottom
+              left: 20,
+              right: 20,
+              child: Container(
+                height: 70,
+                decoration: BoxDecoration(
+                  color: AppColors.colSecondary,
+                  borderRadius: BorderRadius.circular(35),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavIcon("iconHome.png", "Home", 0),
+                    _buildNavIcon("iconQuiz.png", "Quizzes", 1),
+                    const SizedBox(width: 60), // Space for the center Blitz button
+                    _buildNavIcon("iconGroup.png", "Adda", 2),
+                    _buildNavIcon("iconBuy.png", "Buy", 3),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // 3. THE BLITZ BUTTON (Centered on the floating bar)
-          Positioned(
-            bottom: 0,
-            child: GestureDetector(
-              onTap: () {
-                // This will print "Blitz Tapped: 4" in your VS Code / Android Studio console
+            // 3. THE BLITZ BUTTON
+            // alignment: Alignment.bottomCenter in the Stack handles the X-axis
+            Positioned(
+              bottom: 5,
+              child: GestureDetector(
+                onTap: () => onItemTapped(4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
 
-                onItemTapped(4);
-                debugPrint("Blitz Tapped: 4");
-              },
-              child: Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      UiHelper.CustomIcon(img: "iconMenuCenter.png", height: 85, width: 85),
-                      UiHelper.CustomIcon(img: "iconBlitz.png", height: 35, width: 35),
-                    ],
-                  ),
-                  UiHelper.CustomText(text: "BLITZ", color: AppColors.colBlack, fontSize: 14, fontWeight: FontWeight.normal, fontFamily: "KantumruyPro")
-                ],
+                      children: [
+                        UiHelper.CustomIcon(img: "iconMenuCenter.png", height: 85, width: 85),
+                        UiHelper.CustomIcon(img: "iconBlitz.png", height: 35, width: 35),
+                      ],
+                    ),
+                    UiHelper.CustomText(
+                        text: "BLITZ",
+                        color: AppColors.colTertiary,
+                        fontSize: AppFontSizes.fontSizeBody,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: AppFonts.fontFamilyBody
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
-
-
-
-
-        ],
-      ),
+          ],
         ),
+      ),
     );
   }
+
+
+
   // Helper to build individual nav items
   Widget _buildNavIcon(String iconPath, String label, int index) {
     bool isSelected = selectedIndex == index;
@@ -115,7 +121,7 @@ class WidBotMenu extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isSelected ? AppColors.colPurple : Colors.white,
+              color: isSelected ? AppColors.colTertiary : Colors.white,
             ),
             child: UiHelper.CustomIcon(img: iconPath, height: 24, width: 24),
           ),

@@ -43,19 +43,7 @@ class WidQuizHelper {
                   : const SizedBox.shrink(), // Hidden during countdown
             ),
 
-            // Correct Answer Tracker (Left Chip)
-            Positioned(
-              top: -70,
-              left: 20,
-              child: infoChip("$correctCount / $totalQuestions"),
-            ),
 
-            // Countdown Timer (Right Chip)
-            Positioned(
-              top: -70,
-              right: 20,
-              child: infoChip(formatTime(remainingTime)),
-            ),
           ],
         ),
       ],

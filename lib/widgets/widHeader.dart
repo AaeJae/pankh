@@ -11,7 +11,6 @@ class WidHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 150, // Height to accommodate the birds/cloud graphics
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -56,8 +55,8 @@ class WidHeader extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       UiHelper.CustomText(
                         text: "Hello, Anupama!",
-                        color: AppColors.colPurple,
-                        fontSize: 22,
+                        color: AppColors.colWhite,
+                        fontSize: AppFontSizes.fontSizeTitleBig,
                         fontWeight: FontWeight.normal,
                       ),
                       const SizedBox(height: 2),
@@ -71,10 +70,10 @@ class WidHeader extends StatelessWidget implements PreferredSizeWidget {
                                 const SizedBox(width: 3),
                                 UiHelper.CustomText(
                                   text: "2000",
-                                  color: AppColors.colBlack,
-                                  fontSize: 12,
+                                  color: AppColors.colWhite,
+                                  fontSize: AppFontSizes.fontSizeCaption,
                                   fontWeight: FontWeight.normal,
-                                  fontFamily: "KantumruyPro",
+                                  fontFamily: AppFonts.fontFamilyCaption,
                                 ),
                               ],
                             ),

@@ -33,6 +33,7 @@ class AppFonts{
   static const String fontFamilyTitle = "DM Serif Display";
   static const String fontFamilySubtitle = "DM Serif Display";
   static const String fontFamilyBody = "KantumruyPro";
+  static const String fontFamilyCaption = "KantumruyPro";
 
   // INDIC
   static const String fontFamilyDevnagari = "KantumruyPro";
@@ -43,10 +44,11 @@ class AppFonts{
 }
 class AppFontSizes{
   static const double fontSizeLogo = 80;
+  static const double fontSizeTitleBig = 22;
   static const double fontSizeTitle = 20;
   static const double fontSizeSubtitle = 16;
   static const double fontSizeBody = 14;
-
+  static const double fontSizeCaption = 12;
 }
 
 

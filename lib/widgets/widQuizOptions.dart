@@ -18,85 +18,129 @@ class WidQuizOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1x4 for small, 2x2 for big
     int crossAxisCount = (size == QuizOptionSize.small) ? 1 : 2;
-
-    // Wide bars for small (e.g. 5:1 ratio), Squares for big (1:1 ratio)
-    double aspectRatio = (size == QuizOptionSize.small) ? 5.0 : 1.0;
+    // Adjusted ratio to ensure buttons aren't too tall on small screens
+    double aspectRatio = (size == QuizOptionSize.small) ? 5.5 : 1.1;
 
     return GridView.builder(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(20),
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
+        crossAxisSpacing: 5,
+        mainAxisSpacing: 2, // Tighter spacing for elegance
         childAspectRatio: aspectRatio,
       ),
-      itemCount: 4, // no of options to be shown
+      itemCount: options.length > 4 ? 4 : options.length,
       itemBuilder: (context, index) {
         final item = options[index];
         final name = item['name'] ?? "";
         final img = item['image'] ?? "";
 
-        return GestureDetector(
-          onTap: () => onOptionSelected(name),
-          child: size == QuizOptionSize.big
-              ? _buildBigOption(name, img)
-              : _buildSmallOption(name),
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => onOptionSelected(name),
+            child: size == QuizOptionSize.big
+                ? _buildBigOption(name, img)
+                : _buildSmallOption(name),
+          ),
         );
       },
     );
   }
 
-  // BIG STYLE: Image background with text on top
+  // --- BIG STYLE: Premium Card Aesthetic ---
   Widget _buildBigOption(String name, String imgPath) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(50),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          UiHelper.CustomImage(
-            img: imgPath,
-            opacity: 0.6,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          UiHelper.CustomText(
-            text: name,
-            color: AppColors.colPurple,
-            fontSize: 18,
-            textAlign: TextAlign.center,
-            fontFamily: "KantumruyPro",
-            fontWeight: FontWeight.bold,
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Bird Image background
+            UiHelper.CustomImage(
+              img: imgPath,
+              fit: BoxFit.cover,
+            ),
+            // Darkening Gradient for text legibility
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.1),
+                    Colors.black.withOpacity(0.6),
+                  ],
+                ),
+              ),
+            ),
+            // Label
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: UiHelper.CustomText(
+                  text: name,
+                  color: Colors.white,
+                  fontSize: 12,
+                  textAlign: TextAlign.center,
+                  fontFamily: "Laila", // Using Laila for the Bharat look
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // SMALL STYLE: SVG background with text on top
+  // --- SMALL STYLE: Elegant "Pill" Buttons ---
   Widget _buildSmallOption(String name) {
-    return Stack(
+    return Container(
       alignment: Alignment.center,
-      children: [
-        UiHelper.CustomSvg(
-          img: "svgStyledRect.svg",
-          fit: BoxFit.fill,
-          width: double.infinity,
-          height: double.infinity,
-          opacity: 0.8,
+      decoration: BoxDecoration(
+        // Subtle purple gradient inspired by your screenshot
+        gradient: LinearGradient(
+          colors: [
+            AppColors.colSecondary,
+            AppColors.colSecondary,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        UiHelper.CustomText(
-          text: name,
-          color: AppColors.colBlack,
-          fontSize:20,
-          fontFamily: "KantumruyPro",
-          fontWeight: FontWeight.w600,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1.5,
         ),
-      ],
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.colSecondary.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: UiHelper.CustomText(
+        text: name,
+        color: Colors.white,
+        fontSize: 18,
+        fontFamily: "Laila", // Consistent Bharat branding
+        fontWeight: FontWeight.w200,
+      ),
     );
   }
 }
