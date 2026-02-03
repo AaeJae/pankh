@@ -78,6 +78,7 @@ class WidQuizOptions extends StatelessWidget {
   // --- BIG STYLE: Premium Card Aesthetic ---
   Widget _buildBigOption(String name, String imgPath) {
     return Container(
+      height: 150, // CRITICAL: Added fixed height for the Stack to expand into
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
@@ -98,7 +99,7 @@ class WidQuizOptions extends StatelessWidget {
               img: imgPath,
               fit: BoxFit.cover,
             ),
-            // Darkening Gradient for text legibility
+            // Darkening Gradient
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -106,20 +107,22 @@ class WidQuizOptions extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.black.withOpacity(0.1),
-                    Colors.black.withOpacity(0.6),
+                    Colors.black.withOpacity(0.7), // Slightly darker for legibility
                   ],
                 ),
               ),
             ),
             // Label
-            Center(
+            Align( // Using Align instead of Center for bottom-aligned modern look
+              alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(12.0),
                 child: UiHelper.CustomText(
                     text: name,
                     textAlign: TextAlign.center,
-                    color: AppColors.colWhite,
-                    fontSize: AppFontSizes.fontSizeSubtitle,
+                    color: AppColors.colOnPrimary,
+                    fontSize: AppFontSizes.fontSizeSubtitle, // Use a fixed size if AppFontSizes is failing
+                    fontWeight: FontWeight.normal,
                     fontFamily: AppFonts.fontFamilySubtitle
                 ),
               ),
@@ -152,7 +155,7 @@ class WidQuizOptions extends StatelessWidget {
           ],
         ),
         child: Center(
-          child: UiHelper.CustomText(text: text, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle, )
+          child: UiHelper.CustomText(text: text, textAlign: TextAlign.center, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle)
 
 
         ),

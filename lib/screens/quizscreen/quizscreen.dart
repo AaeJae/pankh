@@ -109,11 +109,11 @@ class _QuizScreenState extends State<QuizScreen> {
     final bird = birds[currentIndex];
 
     hints = [
-      "Lore: ${bird.folkStory}",
       "Habitat: ${bird.habitat}",
       "Order: ${bird.order}",
       "Hindi name: ${bird.hindiName}",
       "Marathi name: ${bird.marathiName}",
+      "Lore: ${bird.folkStory}",
       "Personal Observation: ${bird.personalObservation}",
     ];
     if (currentType == QuestionType.audio && birds.isNotEmpty) {
@@ -260,7 +260,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               // Media Stage (Image or Audio)
               WidQuizHelper.buildMediaWrapper(
@@ -268,7 +268,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 mediaWidget: _buildMediaContent(birds[currentIndex]),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               // Hint Navigation
               if (isQuizStarted)

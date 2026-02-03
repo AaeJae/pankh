@@ -12,9 +12,9 @@ class WidQuizHelper {
     return showDialog<String>(
       context: context,
       builder: (context) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Dialog(
-          backgroundColor: Colors.white.withOpacity(0.1),
+          backgroundColor: AppColors.colOnPrimary.withOpacity(0.3),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -65,7 +65,7 @@ class WidQuizHelper {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.15),
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: accentColor.withOpacity(0.5), width: 1.5),
+            //border: Border.all(color: accentColor.withOpacity(0.5), width: 1.5),
           ),
           child: Center(
             child: UiHelper.CustomText(text: label, color: AppColors.colWhite, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppFonts.fontFamilySubtitle)
@@ -129,20 +129,11 @@ class WidQuizHelper {
     required VoidCallback onReplay,
   }) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
+        const SizedBox(height: 40),
         UiHelper.CustomText(text: "Listen to the bird's audio", color: AppColors.colWhite, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppFonts.fontFamilySubtitle),
-        // GestureDetector(
-        //   onTap: onReplay,
-        //   child: Container(
-        //     padding: const EdgeInsets.all(12),
-        //     //decoration: BoxDecoration(
-        //     //  color: Colors.white.withOpacity(0.2),
-        //     //  shape: BoxShape.circle,
-        //     //),
-        //     // child: const Icon(Icons.play_arrow_rounded, size: 50, color: Colors.white),
-        //   ),
-        // ),
+        const SizedBox(height: 30),
 
         birdAudioVisualizer(controller: controller, waveColor: Colors.white),
         const SizedBox(height: 10),
@@ -155,11 +146,11 @@ class WidQuizHelper {
       context: context,
       barrierDismissible: false, // Prevents accidental closing
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
+        backgroundColor: AppColors.colPrimary.withOpacity(0.85),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Center(
           child: UiHelper.CustomText(
-              text: "Quiz Completed!",
+              text: "Quiz finished!",
               color: AppColors.colWhite,
               fontSize: AppFontSizes.fontSizeTitle,
               fontFamily: AppFonts.fontFamilyTitle
@@ -171,7 +162,7 @@ class WidQuizHelper {
             // Display the score
             UiHelper.CustomText(
                 text: "$correct / $total",
-                color: Colors.greenAccent,
+                color: AppColors.colOnPrimary,
                 fontSize: 40,
                 fontWeight: FontWeight.bold
             ),
