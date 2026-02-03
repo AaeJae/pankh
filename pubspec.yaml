@@ -32,7 +32,11 @@ dependencies:
     sdk: flutter
   carousel_slider: ^5.1.1
   flutter_svg: ^2.0.9
+  dio: ^5.4.1
+  path_provider: ^2.1.2
   audioplayers: ^5.2.1
+  audio_waveforms: ^1.0.5
+  confetti: ^0.7.0
   google_fonts: ^6.1.0
   # Core Firebase (Required for everything)
   firebase_core: ^3.0.0

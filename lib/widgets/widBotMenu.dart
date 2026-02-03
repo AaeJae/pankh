@@ -13,127 +13,135 @@ class WidBotMenu extends StatelessWidget {
   });
 
   @override
-  @override
   Widget build(BuildContext context) {
-    // Determine screen width for consistency
-    double screenWidth = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.of(context).size.width;
 
-    return MediaQuery.removePadding(
-      context: context,
-      removeBottom: true,
-      child: Container(
-        color: Colors.transparent,
-        width: screenWidth, // Ensures the stack has a full-width reference point
-        height: 150,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          clipBehavior: Clip.none,
-          children: [
-
-            // 1. THE TREE GRAPHICS (Layered at the bottom)
-            // Balanced left/right to 0 to span the screen perfectly
-            Positioned(
+    return Container(
+      color: Colors.transparent,
+      height: 150,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        clipBehavior: Clip.none,
+        children: [
+          // 1. ISOLATED BACKGROUND GRAPHICS
+          Positioned(
+            bottom: 0,
+            child: RepaintBoundary(
               child: IgnorePointer(
                 child: UiHelper.CustomImage(
                   img: "imgBotGraphics.png",
                   width: screenWidth,
                   fit: BoxFit.fitWidth,
+                  opacity: 0.7,
                 ),
               ),
             ),
+          ),
 
-            // 2. THE FLOATING MENU BAR
-            Positioned(
-              bottom: 30, // Adjusted slightly so it doesn't hit the very bottom
-              left: 20,
-              right: 20,
-              child: Container(
-                height: 70,
-                decoration: BoxDecoration(
-                  color: AppColors.colSecondary,
-                  borderRadius: BorderRadius.circular(35),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildNavIcon("iconHome.png", "Home", 0),
-                    _buildNavIcon("iconQuiz.png", "Quizzes", 1),
-                    const SizedBox(width: 60), // Space for the center Blitz button
-                    _buildNavIcon("iconGroup.png", "Adda", 2),
-                    _buildNavIcon("iconBuy.png", "Buy", 3),
-                  ],
-                ),
+          // 2. THE GLASS MORPHIC BAR
+          Positioned(
+            bottom: 35,
+            left: 20,
+            right: 20,
+            child: Container(
+              height: 65,
+              decoration: BoxDecoration(
+                color: AppColors.colSecondary.withOpacity(0.7), // Deep Matte Green
+                borderRadius: BorderRadius.circular(40),
+                // boxShadow: [
+                //   BoxShadow(
+                //     color: Colors.black.withOpacity(0.3),
+                //     blurRadius: 25,
+                //     offset: const Offset(0, 12),
+                //   ),
+                // ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildNavIcon(Icons.home_filled, "Home", 0),
+                  _buildNavIcon(Icons.auto_awesome_rounded, "Explore", 1),
+                  const SizedBox(width: 70), // Center space
+                  _buildNavIcon(Icons.forum_rounded, "Adda", 2),
+                  _buildNavIcon(Icons.local_mall_rounded, "Shop", 3),
+                ],
               ),
             ),
+          ),
 
-            // 3. THE BLITZ BUTTON
-            // alignment: Alignment.bottomCenter in the Stack handles the X-axis
-            Positioned(
-              bottom: 5,
-              child: GestureDetector(
-                onTap: () => onItemTapped(4),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
-
-                      children: [
-                        UiHelper.CustomIcon(img: "iconMenuCenter.png", height: 85, width: 85),
-                        UiHelper.CustomIcon(img: "iconBlitz.png", height: 35, width: 35),
+          // 3. THE MODERN BLITZ BUTTON
+          Positioned(
+            bottom: 25,
+            child: GestureDetector(
+              onTap: () => onItemTapped(4),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Outer Ambient Glow
+                  Container(
+                    height: 85,
+                    width: 85,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.colWhite.withOpacity(0.3),
+                          blurRadius: 20,
+                          spreadRadius: 3,
+                        )
                       ],
                     ),
-                    UiHelper.CustomText(
-                        text: "BLITZ",
-                        color: AppColors.colTertiary,
-                        fontSize: AppFontSizes.fontSizeBody,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: AppFonts.fontFamilyBody
-                    )
-                  ],
-                ),
+                  ),
+
+                  // The "Glass" Housing
+                  Container(
+                    height: 75,
+                    width: 75,
+
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.colSecondary, AppColors.colPrimary],
+                      ),
+                    ),
+                  ),
+
+                  // THE ICON: Minimalist Lightning
+                  Icon(
+                    Icons.bolt_rounded,
+                    color: AppColors.colOnTertiary.withOpacity(0.3), // Sunset Gold
+                    size: 65,
+                    shadows: const [
+                      Shadow(color: Colors.black26, offset: Offset(0, 4), blurRadius: 10)
+                    ],
+                  ),
+                  UiHelper.CustomText(text:"Play \n BLITZ",textAlign: TextAlign.center, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppFonts.fontFamilyCaption, fontWeight: FontWeight.normal,),
+
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-
-
-  // Helper to build individual nav items
-  Widget _buildNavIcon(String iconPath, String label, int index) {
-    bool isSelected = selectedIndex == index;
+  Widget _buildNavIcon(IconData icon, String label, int index) {
+    final bool isSelected = selectedIndex == index;
     return GestureDetector(
       onTap: () => onItemTapped(index),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isSelected ? AppColors.colTertiary : Colors.white,
-            ),
-            child: UiHelper.CustomIcon(img: iconPath, height: 24, width: 24),
+          Icon(
+            icon,
+            size: 24,
+            color: isSelected ? const Color(0xFFFFB703) : Colors.white60,
           ),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: Colors.black,
-            ),
-          ),
+          UiHelper.CustomText(text:label, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeCaption, fontFamily: AppFonts.fontFamilyCaption, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,),
         ],
       ),
     );

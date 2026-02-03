@@ -2,19 +2,31 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/modBird.dart';
 
 class BirdService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  // In serBird.dart
 
-  Future<List<BirdModel>> getAllBirds() async {
+  static Future<List<modBird>> getBirds({
+    int limitRows = 5,
+    String? filterColumn,
+    dynamic filterValue,
+  }) async {
     try {
-      // Fetches the entire 'birds' collection
-      QuerySnapshot snapshot = await _db.collection('birds').get();
+      Query query = FirebaseFirestore.instance.collection('birds');
 
+      if (filterColumn != null && filterValue != null) {
+        query = query.where(filterColumn, isEqualTo: filterValue);
+      }
+
+      // Limit the fetch to save DB costs and bandwidth
+      final snapshot = await query.limit(limitRows).get();
+
+      // RESOURCE EFFICIENT: Use your existing factory constructor
       return snapshot.docs.map((doc) {
-        return BirdModel.fromFirestore(doc.data() as Map<String, dynamic>, doc.id);
+        return modBird.fromFirestore(doc.data() as Map<String, dynamic>);
       }).toList();
+
     } catch (e) {
-      print("Error fetching birds: $e");
       return [];
     }
   }
+
 }

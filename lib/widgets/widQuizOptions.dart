@@ -2,52 +2,76 @@ import 'package:flutter/material.dart';
 import '../../../widgets/uihelper.dart';
 import 'package:pankh/constants/appTokens.dart';
 
-enum QuizOptionSize { small, big }
-
 class WidQuizOptions extends StatelessWidget {
   final List<Map<String, String>> options;
-  final QuizOptionSize size;
+  final String optionSize;
   final Function(String) onOptionSelected;
 
   const WidQuizOptions({
     super.key,
     required this.options,
     required this.onOptionSelected,
-    this.size = QuizOptionSize.big,
+    required this.optionSize,
   });
 
   @override
   Widget build(BuildContext context) {
-    int crossAxisCount = (size == QuizOptionSize.small) ? 1 : 2;
-    // Adjusted ratio to ensure buttons aren't too tall on small screens
-    double aspectRatio = (size == QuizOptionSize.small) ? 5.5 : 1.1;
+    // If we have no options, return empty
+    if (options.isEmpty) return const SizedBox.shrink();
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 5,
-        mainAxisSpacing: 2, // Tighter spacing for elegance
-        childAspectRatio: aspectRatio,
-      ),
-      itemCount: options.length > 4 ? 4 : options.length,
-      itemBuilder: (context, index) {
-        final item = options[index];
-        final name = item['name'] ?? "";
-        final img = item['image'] ?? "";
+    // Logic: If 'big' (audio mode), show 2x2 grid. If 'small', show 1x4 list.
+    bool isSmall = optionSize == "small";
 
-        return Material(
-          color: Colors.transparent,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      child: isSmall ? _buildSmallList() : _buildBigGrid(),
+    );
+  }
+
+  // Optimized for Image Questions (Single Column for better visibility)
+  Widget _buildSmallList() {
+    return Column(
+      children: options.map((item) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
           child: InkWell(
-            onTap: () => onOptionSelected(name),
-            child: size == QuizOptionSize.big
-                ? _buildBigOption(name, img)
-                : _buildSmallOption(name),
+            onTap: () => onOptionSelected(item['name']!),
+            child: _buildSmallOption(item['name']!),
           ),
         );
-      },
+      }).toList(),
+    );
+  }
+
+  // Optimized for Audio Questions (2x2 Grid using Rows)
+  Widget _buildBigGrid() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _buildGridItem(0)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildGridItem(1)),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(child: _buildGridItem(2)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildGridItem(3)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGridItem(int index) {
+    if (index >= options.length) return const SizedBox.shrink();
+    final item = options[index];
+    return InkWell(
+      onTap: () => onOptionSelected(item['name']!),
+      child: _buildBigOption(item['name']!, item['image']!),
     );
   }
 
@@ -92,12 +116,11 @@ class WidQuizOptions extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: UiHelper.CustomText(
-                  text: name,
-                  color: Colors.white,
-                  fontSize: 12,
-                  textAlign: TextAlign.center,
-                  fontFamily: "Laila", // Using Laila for the Bharat look
-                  fontWeight: FontWeight.normal,
+                    text: name,
+                    textAlign: TextAlign.center,
+                    color: AppColors.colWhite,
+                    fontSize: AppFontSizes.fontSizeSubtitle,
+                    fontFamily: AppFonts.fontFamilySubtitle
                 ),
               ),
             ),
@@ -108,38 +131,31 @@ class WidQuizOptions extends StatelessWidget {
   }
 
   // --- SMALL STYLE: Elegant "Pill" Buttons ---
-  Widget _buildSmallOption(String name) {
-    return Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        // Subtle purple gradient inspired by your screenshot
-        gradient: LinearGradient(
-          colors: [
-            AppColors.colSecondary,
-            AppColors.colSecondary,
+  Widget _buildSmallOption(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0), // Space between pills
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          vertical: 15.0,   // Increase this value to make pills thicker
+          horizontal: 15.0,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.colSecondary.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(30), // Keeps the "pill" shape
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 1.5,
+        child: Center(
+          child: UiHelper.CustomText(text: text, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle, )
+
+
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.colSecondary.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: UiHelper.CustomText(
-        text: name,
-        color: Colors.white,
-        fontSize: 18,
-        fontFamily: "Laila", // Consistent Bharat branding
-        fontWeight: FontWeight.w200,
       ),
     );
   }

@@ -4,23 +4,20 @@ import 'package:flutter/material.dart';
 // COLORS
 // ========================
 class AppColors {
-  //PURPLE THEME
-  static const Color colPurple = Color(0xFF6750A4);
-  static const Color colPurpleSecondary = Color(0xFFEADDFF);
-
   // GREEN THEME
-  static const Color colPrimary = Color(0xFF6750A4);
-  static const Color colOnPrimary = Color(0xFF6750A4);
+  static const Color colPrimary = Color(0xFF1B4332);
+  static const Color colOnPrimary = Color(0xFFF8F9FA);
   static const Color colSecondary = Color(0xFF3B633D);
   static const Color colOnSecondary = Color(0xFF6750A4);
   static const Color colTertiary = Color(0xFFFFF8D0);
-  static const Color colOnTertiary = Color(0xFF6750A4);
+  static const Color colOnTertiary = Color(0xFFFCBF49);
 
   // COMMON
   static const Color colWhite = Color(0xFFFFFFFF);
   static const Color colBlack = Color(0xFF000000);
   static const Color colGreen = Color(0xFF00FF00);
   static const Color colRed = Color(0xFFFF0000);
+
 
 }
 
@@ -57,10 +54,24 @@ class AppFontSizes{
 // GAMEPLAY
 // ========================
 
-class AppLevels {
-  static const String levelEasy = "Easy";
-  static const String levelMedium = "Medium";
-  static const String levelHard = "Hard";
+enum QuestionType {
+  image("small"),
+  audio("big");
+
+  final String optionSize;
+
+  const QuestionType(this.optionSize);
+}
+
+enum QuizLevel {
+  beginner('Beginner', 'Common'),
+  intermediate('Intermediate', 'Occasional'),
+  expert('Expert', 'Rare');
+
+  final String displayText;   // What the user sees
+  final String databaseValue; // What Firebase searches for
+
+  const QuizLevel(this.displayText, this.databaseValue);
 }
 
 

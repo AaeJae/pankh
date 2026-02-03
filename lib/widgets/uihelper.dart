@@ -9,23 +9,48 @@ class UiHelper {
     double? height,
     double? width,
     BoxFit? fit,
-    Color? overlayColor = AppColors.colWhite,
-    double? opacity = 1.0, // Default to fully opaque
+    Color? overlayColor,
+    double? opacity = 1.0,
   }) {
-    final double effectiveOpacity = opacity ?? 1.0;
-    final Color effectiveColor = overlayColor ?? Colors.white;
+    final bool isNetwork = img.startsWith("http");
+    final String path = isNetwork ? img : "assets/images/$img";
 
-    return Image.asset(
-      "assets/images/$img",
+    // Use a ColorFilter for opacity/tinting instead of color/blendMode
+    // This is more performant and predictable in Flutter
+    Widget imageWidget = isNetwork
+        ? Image.network(
+      path,
+      height: height,
+      width: width,
+      fit: fit ?? BoxFit.cover,
+      // Loading placeholder to prevent "popping"
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return SizedBox(
+          height: height,
+          width: width,
+          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) =>
+      const Icon(Icons.broken_image, color: Colors.white54),
+    )
+        : Image.asset(
+      path,
       height: height,
       width: width,
       fit: fit ?? BoxFit.contain,
-      // Only apply the color/blend if the image is meant to be translucent
-      color: effectiveOpacity < 1.0
-          ? effectiveColor.withOpacity(1.0 - effectiveOpacity)
-          : null,
-      colorBlendMode: effectiveOpacity < 1.0 ? BlendMode.lighten : null,
     );
+
+    // Apply Opacity/Tinting only if needed
+    if (opacity != null && opacity < 1.0) {
+      return Opacity(
+        opacity: opacity,
+        child: imageWidget,
+      );
+    }
+
+    return imageWidget;
   }
 
   static CustomIcon({

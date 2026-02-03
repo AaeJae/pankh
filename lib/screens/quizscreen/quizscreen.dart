@@ -1,56 +1,83 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:math';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:audio_waveforms/audio_waveforms.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+
+// Internal Project Imports
 import 'package:pankh/constants/appTokens.dart';
 import 'package:pankh/models/modBird.dart';
-import 'package:pankh/services/serBird.dart';
 import 'package:pankh/widgets/widQuizHelper.dart';
 import 'package:pankh/widgets/widQuizOptions.dart';
 import 'package:pankh/widgets/uihelper.dart';
 
+import '../../services/serBird.dart';
+
+
+
 class QuizScreen extends StatefulWidget {
-  final VoidCallback onQuit; // Add this
-  const QuizScreen({super.key, required this.onQuit});
+  final VoidCallback onQuit;
+  final String difficulty;
+  const QuizScreen({super.key, required this.onQuit, required this.difficulty});
+
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateMixin {
-  final BirdService _birdService = BirdService();
-  List<BirdModel> birds = [];
+class _QuizScreenState extends State<QuizScreen> {
+  // --- Services & Controllers ---
+  final AudioPlayer _audioPlayer = AudioPlayer(); // For logic
+  late PlayerController _waveformController; // For visuals
+  late ConfettiController _confettiController;
+  static final Dio _dio = Dio();
+
+  // --- State Variables ---
+  List<modBird> birds = [];
   bool isLoading = true;
   int currentIndex = 0;
   int correctCount = 0;
-
+  int currentHintIndex = 0;
   int countdown = 3;
   bool isQuizStarted = false;
-  Duration quizDuration = const Duration(minutes: 2);
+  QuestionType currentType = QuestionType.image;
+  List<String> hints = [];
+
+
+  // --- Timers & Notifiers ---
+  final ValueNotifier<Duration> _timerNotifier = ValueNotifier(const Duration(minutes: 2));
   Timer? _countdownTimer;
   Timer? _quizTimer;
-
-  late AnimationController _bgRotationController;
 
   @override
   void initState() {
     super.initState();
-    _bgRotationController = AnimationController(
-      duration: const Duration(seconds: 30),
-      vsync: this,
-    )..repeat();
+    _waveformController = PlayerController();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
     _initializeQuiz();
+
   }
 
-  void _initializeQuiz() async {
-    WidQuizHelper.resetScore();
-    List<BirdModel> fetchedBirds = await _birdService.getAllBirds();
+  // ==========================================
+  // LOGIC & STATE MANAGEMENT
+  // ==========================================
 
+  Future<void> _initializeQuiz() async {
+    correctCount = 0;
     if (mounted) {
-      setState(() {
-        birds = fetchedBirds;
-        isLoading = false;
-      });
-      if (birds.isNotEmpty) {
-        _startInitialCountdown();
-      }
+      setState(() => isLoading = true);
+      try {
+        final data = await BirdService.getBirds(limitRows:5, filterColumn:"urbanOccurance",filterValue: widget.difficulty);
+        setState(() {
+
+          isLoading = false;
+          birds = data;
+        });
+      } catch (e) {print("Error fetching birds: $e");}
+      if (birds.isNotEmpty) _startInitialCountdown();
     }
   }
 
@@ -62,14 +89,15 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
         timer.cancel();
         setState(() => isQuizStarted = true);
         _startQuizTimer();
+        _prepareQuestionMedia(); // Play sound immediately if first question is audio
       }
     });
   }
 
   void _startQuizTimer() {
     _quizTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (quizDuration.inSeconds > 0) {
-        setState(() => quizDuration -= const Duration(seconds: 1));
+      if (_timerNotifier.value.inSeconds > 0) {
+        _timerNotifier.value -= const Duration(seconds: 1);
       } else {
         timer.cancel();
         _finishQuiz();
@@ -77,39 +105,126 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     });
   }
 
-  void _handleAnswer(String selectedName) {
-    if (selectedName == birds[currentIndex].birdName) {
-      WidQuizHelper.incrementScore();
-      correctCount++; // <-- increment correct answers
+  void _prepareQuestionMedia() {
+    final bird = birds[currentIndex];
+
+    hints = [
+      "Lore: ${bird.folkStory}",
+      "Habitat: ${bird.habitat}",
+      "Order: ${bird.order}",
+      "Hindi name: ${bird.hindiName}",
+      "Marathi name: ${bird.marathiName}",
+      "Personal Observation: ${bird.personalObservation}",
+    ];
+    if (currentType == QuestionType.audio && birds.isNotEmpty) {
+      _playBirdSound(bird.gitAudio[0]);
     }
+  }
+
+  Future<void> _playBirdSound(String url) async {
+    if (url.isEmpty) return;
+    try {
+      // 1. Stop any current playback and download and get URL file
+      await _waveformController.stopPlayer();
+      String localPath = await _downloadAndGetPath(url);
+      await _waveformController.preparePlayer(
+        path: localPath,
+        shouldExtractWaveform: true,
+      );
+
+      // 2. Start playback
+      await _waveformController.startPlayer();
+    } catch (e) {
+      debugPrint("Playback Error: $e");
+      // FALLBACK: If waveform player fails, use the standard audioPlayer
+      await _audioPlayer.play(UrlSource(url));
+    }
+  }
+
+  void _handleAnswer(String selectedName) {
+    _waveformController.stopPlayer(); // Stop sound when answered
+
+    if (selectedName == birds[currentIndex].birdName) {
+      _confettiController.play();
+      setState(() => correctCount++);
+    }
+
     if (currentIndex < birds.length - 1) {
-      setState(() => currentIndex++);
+      setState(() {
+        currentIndex++;
+        currentHintIndex = 0;
+        currentType = QuestionType.values[Random().nextInt(QuestionType.values.length)];
+      });
+      _prepareQuestionMedia();
     } else {
       _finishQuiz();
     }
   }
 
-
-  void _finishQuiz() {
+  void _finishQuiz() async {
     _quizTimer?.cancel();
+    _waveformController.stopPlayer();
+
+    // 1. Call the helper and WAIT for the user's choice
+    final String? action = await WidQuizHelper.showResults(
+        context,
+        correctCount,
+        birds.length
+    );
+
+    // 2. Handle the choice here where the state lives
+    if (action == "restart") {
+      // Reset variables so the UI looks fresh
+      setState(() {
+        currentIndex = 0;
+        correctCount = 0;
+        currentHintIndex = 0;
+        countdown = 3;
+        isQuizStarted = false;
+        _timerNotifier.value = const Duration(minutes: 2);
+      });
+
+      // Call your init method to fetch new birds
+      _initializeQuiz();
+
+    } else if (action == "exit") {
+      widget.onQuit(); // This calls the Navigator.pop(context) you passed in
+    }
+  }
+
+// Add this helper to clean up the state before restarting
+  void _resetGameState() {
+    setState(() {
+      currentIndex = 0;
+      correctCount = 0;
+      currentHintIndex = 0;
+      countdown = 3;
+      isQuizStarted = false;
+      _timerNotifier.value = const Duration(minutes: 2); // Reset timer
+    });
   }
 
   @override
   void dispose() {
     _countdownTimer?.cancel();
     _quizTimer?.cancel();
-    _bgRotationController.dispose();
+    _audioPlayer.dispose();
+    _waveformController.dispose();
+    _confettiController.dispose();
+    _timerNotifier.dispose();
+    _waveformController.dispose();
     super.dispose();
   }
+
+  // ==========================================
+  // UI BUILDERS
+  // ==========================================
 
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
-    final currentBird = birds[currentIndex];
-
     return Scaffold(
-      extendBodyBehindAppBar: true,
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -120,153 +235,226 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
             colors: [AppColors.colTertiary, AppColors.colSecondary],
           ),
         ),
-        child: Column(
-          children: [
-            // 1. DYNAMIC TOP SPACING (Clears your custom Header)
-            SizedBox(height: 110),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildTopHeader(),
 
-            // 2. QUIZ HEADER (Close button + Title)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.close, color: AppColors.colSecondary, size: 30),
-                    onPressed: () => _showExitConfirmation(),
-                  ),
-                  const Spacer(),
-                  UiHelper.CustomText(
-                      text: "Pankh Quiz",
-                      fontFamily: AppFonts.fontFamilyLogo,
-                      fontSize: AppFontSizes.fontSizeTitleBig,
-                      color: AppColors.colSecondary,
-                      fontWeight: FontWeight.bold
-                  ),
-                  const Spacer(),
-                  const SizedBox(width: 48),
-                ],
-              ),
-            ),
 
-            // 3. PROGRESS BAR
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Row(
-                children: [
-                  _buildInfoChip("${correctCount} / ${birds.length}"),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: (currentIndex) / birds.length,
-                          minHeight: 8,
-                          backgroundColor: AppColors.colWhite.withOpacity(0.2),
-                          color: AppColors.colSecondary,
-                        ),
-                      ),
+
+              // Progress Section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Row(
+                  children: [
+                    WidQuizHelper.infoChip("$correctCount / ${birds.length}"),
+                    const SizedBox(width: 10),
+                    Expanded(child: WidQuizHelper.progressBar(currentIndex, birds.length)),
+                    const SizedBox(width: 10),
+                    ValueListenableBuilder<Duration>(
+                      valueListenable: _timerNotifier,
+                      builder: (context, time, _) =>
+                          WidQuizHelper.infoChip(WidQuizHelper.formatTime(time)),
                     ),
-                  ),
-                  _buildInfoChip(_formatDuration(quizDuration)),
-                ],
-              ),
-            ),
-
-            // 4. BIRD IMAGE BOX (Slightly smaller to prevent overflow)
-            WidQuizHelper.buildMediaWrapper(
-              isQuizStarted: isQuizStarted,
-              totalQuestions: birds.length,
-              remainingTime: quizDuration,
-              mediaWidget: _buildMediaContent(currentBird),
-            ),
-
-            // 5. THE 20PX GAP
-            const SizedBox(height: 20),
-
-            // 6. OPTIONS AREA (Scrollable to prevent "Yellow Stripe" error)
-            Expanded(
-              child: isQuizStarted
-                  ? SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 120), // Large bottom padding for Nav Bar
-                child: WidQuizOptions(
-                  options: birds.map((b) => {
-                    "name": b.birdName,
-                    "image": b.birdImageUrls.isNotEmpty ? b.birdImageUrls[0] : ""
-                  }).toList(),
-                  size: QuizOptionSize.small,
-                  onOptionSelected: _handleAnswer,
+                  ],
                 ),
-              )
-                  : Center(child: WidQuizHelper.buildBigCounter(countdown)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+              ),
 
-  // --- HELPERS ---
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, "0");
-    return "${twoDigits(duration.inMinutes.remainder(60))}:${twoDigits(duration.inSeconds.remainder(60))}";
-  }
+              const SizedBox(height: 20),
 
-  Widget _buildInfoChip(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.colWhite.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.colWhite.withOpacity(0.3)),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.colWhite, fontSize: 13),
-      ),
-    );
-  }
+              // Media Stage (Image or Audio)
+              WidQuizHelper.buildMediaWrapper(
+                isQuizStarted: isQuizStarted,
+                mediaWidget: _buildMediaContent(birds[currentIndex]),
+              ),
 
-  Widget _buildMediaContent(BirdModel bird) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white, width: 6),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 5))],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Image.network(
-          bird.birdImageUrls.isNotEmpty ? bird.birdImageUrls[0] : "",
-          height: 220, // Reduced height to fit options better
-          width: 220,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 80, color: Colors.white),
-        ),
-      ),
-    );
-  }
+              const SizedBox(height: 20),
 
-  Future<void> _showExitConfirmation() async {
-    bool? quit = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Quit Quiz?", style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text("Your progress will be lost. Are you sure?"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("STAY")),
-          TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text("QUIT", style: TextStyle(color: Colors.red))
+              // Hint Navigation
+              if (isQuizStarted)
+                WidQuizHelper.hintCarousel(
+                  currentIndex: currentHintIndex,
+                  totalHints: hints.length,
+
+                  onPrevious: () => setState(() =>
+                  currentHintIndex = (currentHintIndex > 0) ? currentHintIndex - 1 : hints.length - 1
+                  ),
+
+                  onNext: () => setState(() =>
+                  currentHintIndex = (currentHintIndex + 1) % hints.length
+                  ),
+                ),
+
+              // Options Grid
+              Expanded(
+                child: isQuizStarted
+                    ? _buildOptionsArea()
+                    : WidQuizHelper.buildBigCounter(countdown),
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Row(
+        children: [
+          const SizedBox(width: 48), // Spacer to center title
+          const Spacer(),
+          UiHelper.CustomText(
+            text: "Pankh Quiz",
+            fontFamily: AppFonts.fontFamilyLogo,
+            fontSize: AppFontSizes.fontSizeTitleBig,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white, size: 30),
+            onPressed: () => _showExitConfirmation(),
+          ),
+
         ],
       ),
     );
+  }
 
-    if (quit == true && mounted) {
-      widget.onQuit(); // This triggers the index switch in HomeScreen
+  Widget _buildMediaContent(modBird bird) {
+    // 1. Determine the media widget based on currentType
+    Widget mediaWidget;
+
+    switch (currentType) {
+      case QuestionType.image:
+        mediaWidget = Image.network(
+          bird.gitImageURL,
+          height: double.infinity,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+          const Icon(Icons.broken_image, size: 50, color: Colors.white54),
+        );
+        break;
+
+      case QuestionType.audio:
+        mediaWidget = WidQuizHelper.buildAudioUI(
+          controller: _waveformController,
+          onReplay: () => _playBirdSound(bird.gitAudio[0]),
+        );
+        break;
+
+    // Add future cases here, e.g., QuestionType.video:
+    }
+
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        // media based on QuestionType
+        mediaWidget,
+
+        // Confetti Layer
+        Positioned(
+          top: 0,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            shouldLoop: false,
+            createParticlePath: WidQuizHelper.drawFeather,
+            particleDrag: 0.05,
+            colors: const [Color(0xFF2D5A27), Color(0xFF8B4513), Color(0xFFD4AF37), Color(0xFF4682B4)],
+            numberOfParticles: 50,
+            gravity: 0.9,
+          ),
+        ),
+
+        // Hint Overlay
+        if (isQuizStarted) WidQuizHelper.hintOverlay(hints[currentHintIndex]),
+      ],
+    );
+  }
+
+  Widget _buildOptionsArea() {
+    // Generate the 4 options for this specific question
+    final currentOptions = _generateOptions();
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+      child: WidQuizOptions(
+        options: currentOptions, // Now only 4 birds (1 correct, 3 wrong)
+        optionSize: currentType.optionSize,
+        onOptionSelected: (selectedName) => _handleAnswer(selectedName),
+      ),
+    );
+  }
+
+  List<Map<String, String>> _generateOptions() {
+    final correctBird = birds[currentIndex];
+
+    // 1. Create a list of all birds EXCEPT the correct one
+    List<modBird> others = birds.where((b) => b.birdName != correctBird.birdName).toList();
+
+    // 2. Shuffle the 'others' and take 3
+    others.shuffle();
+    List<modBird> distractors = others.take(3).toList();
+
+    // 3. Combine correct bird + 3 distractors
+    List<modBird> quizOptions = [correctBird, ...distractors];
+
+    // 4. Shuffle again so the correct answer isn't always at index 0
+    quizOptions.shuffle();
+
+    return quizOptions.map((b) => {
+      "name": b.birdName,
+      "image": b.gitImageURL,
+    }).toList();
+  }
+
+  Future<void> _showExitConfirmation() async {
+    final bool? quit = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Quit Quiz?"),
+        content: const Text("Your current progress will be lost."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("STAY")),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("QUIT")),
+        ],
+      ),
+    );
+    if (quit == true) widget.onQuit();
+  }
+
+// Inside _QuizScreenState
+  Future<String> _downloadAndGetPath(String url) async {
+    if (url.isEmpty) return "";
+
+    try {
+      // 1. Get the system temp directory
+      final dir = await getTemporaryDirectory();
+
+      // 2. Create a unique filename based on the URL to prevent redundant downloads
+      // This extracts the last part of the URL (e.g., 'house_sparrow_song.mp3')
+      final String fileName = url.split('/').last;
+      final file = File('${dir.path}/$fileName');
+
+      // 3. Check if file already exists (Cache hit)
+      if (await file.exists()) {
+        debugPrint("Audio Cache Hit: $fileName");
+        return file.path;
+      }
+
+      // 4. Download only if it doesn't exist (Cache miss)
+      debugPrint("Audio Cache Miss: Downloading $fileName...");
+      await Dio().download(url, file.path);
+
+      return file.path;
+    } catch (e) {
+      debugPrint("Download Error: $e");
+      return ""; // Handle failure gracefully
     }
   }
 }
