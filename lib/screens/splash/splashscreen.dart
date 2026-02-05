@@ -8,6 +8,7 @@ import 'package:pankh/screens/homescreen/homescreen.dart';
 import 'package:pankh/widgets/wid_uihelper.dart';
 import '../../models/mod_bird.dart';
 import '../../services/ser_bird.dart';
+import '../../services/ser_thirdpartydata.dart';
 import '../../services/ser_user.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -55,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       ////////////////////
       // --- CAROUSEL BIRDS PRECACHE FROM GIT REPO URL VIA HIVE ---
       ///////////////////
-      initialBirds = SerBird.getBirds(limitRows: 10); // Get 10 random birds for Carousel
+      initialBirds = await ThirdPartyDataService.ebirdNearbyBirds("India"); // Get 10 random birds for Carousel
       for (var bird in initialBirds) {
         if (bird.gitImageURL.isNotEmpty && mounted) {
           precacheImage(NetworkImage(bird.gitImageURL), context); // Pre-cache images (Still needed since images are URLs to Git)

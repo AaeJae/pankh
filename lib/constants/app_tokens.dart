@@ -48,6 +48,19 @@ class AppFontSizes{
   static const double fontSizeCaption = 12;
 }
 
+// ========================
+// BORDER RADIUS
+// ========================
+class AppBorderRadius {
+  static const int bordRadiusXSmall = 8;
+  static const int bordRadiusSmall = 16;
+  static const int bordRadiusMedium = 30;
+  static const int bordRadiusLarge = 50;
+  static const int bordRadiusCircular = 9999;
+}
+
+
+
 
 
 // ========================

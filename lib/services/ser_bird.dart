@@ -9,7 +9,7 @@ class SerBird {
   ////////////////////////
 
   static List<ModBird> getBirds({
-    int limitRows = 5,
+    int limitRows=999,
     String? filterColumn,
     dynamic filterValue,
   }) {

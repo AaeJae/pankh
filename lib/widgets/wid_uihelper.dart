@@ -107,21 +107,26 @@ class UiHelper {
   }
 
 
-  static customText({
+  static Widget customText({
     required String text,
-    required Color color,
-    required double fontSize,
-    FontWeight? fontWeight,
+    double fontSize = 14.0,
+    FontWeight fontWeight = FontWeight.normal,
+    Color color = Colors.black,
+    TextAlign textAlign = TextAlign.start,
+    TextOverflow? overflow = TextOverflow.ellipsis, // Default to ellipsis
+    int? maxLines, // Added parameter
     String? fontFamily,
-    TextAlign? textAlign,
   }) {
-    return Text(text,
-      textAlign: textAlign?? TextAlign.start,
+    return Text(
+      text,
+      textAlign: textAlign,
+      maxLines: maxLines, // Pass it here
+      overflow: overflow,
       style: TextStyle(
-        color: color,
         fontSize: fontSize,
-        fontWeight: fontWeight ?? FontWeight.normal,
-        fontFamily: fontFamily ?? "DM Serif Display",
+        fontWeight: fontWeight,
+        color: color,
+        fontFamily: fontFamily,
       ),
     );
   }
@@ -209,7 +214,18 @@ class UiHelper {
     );
   }
 
-  static Widget buildSectionHeaderWithPills(String title, List<String> filterPills, {String? currentFilter, Function(String)? onTap}) {
+  static Widget buildSectionHeaderWithPills({
+    required String title,
+    String? subtitle,
+    String? currentFilter, // This is the ONLY source of truth for selection
+    String defaultFilter = '', // Fallback if currentFilter is null
+    List<Map<String, dynamic>>? pills,
+  }) {
+    // Determine what is actually selected
+    final String activeEntry = (currentFilter == null || currentFilter.isEmpty)
+        ? defaultFilter
+        : currentFilter;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
@@ -221,45 +237,49 @@ class UiHelper {
             fontWeight: FontWeight.bold,
             color: AppColors.colPrimary,
           ),
-          if (filterPills.isNotEmpty) ...[
+          if (subtitle != null && subtitle.isNotEmpty)
+            UiHelper.customText(
+                text: subtitle,
+                color: AppColors.colPrimary,
+                fontSize: AppFontSizes.fontSizeSubtitle
+            ),
+
+          if (pills != null && pills.isNotEmpty) ...[
             const SizedBox(height: 10),
             SizedBox(
-              height: 30,
+              height: 32,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: filterPills.length,
+                itemCount: pills.length,
                 separatorBuilder: (context, index) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
-                  final label = filterPills[index];
-                  final isSelected = label == currentFilter;
-                  // First pill is unlocked, others are "locked" for this skeleton
-                  final bool isPillLocked = index > 0;
+                  final pill = pills[index];
+                  final String label = pill['label'] ?? '';
+                  final bool isSelected = label == activeEntry;
 
                   return GestureDetector(
-                    onTap: () => onTap?.call(label),
+                    onTap: pill['onTap'], // Executes the logic passed from the call
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.colPrimary.withValues(alpha:0.3)
+                            ? AppColors.colPrimary.withValues(alpha: 0.3)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.colPrimary, width: 0.5),
+                        border: Border.all(
+                            color: isSelected ? AppColors.colPrimary : AppColors.colPrimary.withValues(alpha: 0.4),
+                            width: 0.5
+                        ),
                       ),
-                      child: Row(
-                        children: [
-                          if (isPillLocked)
-                            Icon(Icons.lock, size: 12, color: isSelected ? AppColors.colPrimary : Colors.grey),
-                          if (isPillLocked) const SizedBox(width: 4),
-                          Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: isSelected ? AppColors.colPrimary : Colors.grey,
-                            ),
+                      child: Center(
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected ? AppColors.colPrimary : Colors.grey,
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   );
@@ -272,17 +292,21 @@ class UiHelper {
     );
   }
 
-  static Widget buildHorizontalCardCarousel({required String type, required int count, required int lockedAfterIndex}) {
+  static Widget buildHorizontalCardCarousel({
+    double height = 150,
+    double width = 150,
+    required String sectionName,
+    required int itemCount,
+    required int lockedAfterIndex}) {
     return SizedBox(
-      height: 180,
+      height: height,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: count,
+        itemCount: itemCount,
         itemBuilder: (context, index) {
           return UiHelper.buildCard(
-            width: 150,
-            title: "$type ${index + 1}",
+            width: width,
             subtitle: "Level ${index + 1}",
             isLocked: index > lockedAfterIndex,
           );
@@ -293,9 +317,11 @@ class UiHelper {
 
   static Widget buildCard({
     required double width,
-    required String title,
-    required String subtitle,
-    bool isFeatured = false,
+    String title = "",
+    String subtitle = "",
+    String imagePath = "",
+    String hasTopLeftBadge = "",
+    String hasTopRightBadge = "",
     bool isLocked = false,
   }) {
     return Container(
@@ -304,10 +330,14 @@ class UiHelper {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: AppColors.colSecondary, // Fallback color
-        image: DecorationImage(
-          image: NetworkImage("https://picsum.photos/seed/${title.hashCode}/400/300"),
+        image: imagePath.isNotEmpty
+            ? DecorationImage(
+          image: imagePath.startsWith('http')
+              ? NetworkImage(imagePath)
+              : AssetImage(imagePath) as ImageProvider,
           fit: BoxFit.cover,
-        ),
+        )
+            : null,
         boxShadow: [
           BoxShadow(color: Colors.black.withValues(alpha:0.05), blurRadius: 8, offset: const Offset(0, 4))
         ],
@@ -327,35 +357,36 @@ class UiHelper {
           ),
 
           // TOP LEFT: FEATURED BADGE
-          if (isFeatured)
+            if (hasTopLeftBadge.isNotEmpty)
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.colOnTertiary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(hasTopLeftBadge, style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                ),
+              ),
+
+          // TOP RIGHT: XP BADGE
+          if (hasTopRightBadge.isNotEmpty)
             Positioned(
               top: 12,
-              left: 12,
+              right: 12,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.colOnTertiary,
+                  color: const Color(0xFFFFD700),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text("FEATURED", style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                child: Text(hasTopRightBadge, style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold)),
               ),
             ),
 
-          // TOP RIGHT: XP BADGE
-          Positioned(
-            top: 12,
-            right: 12,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFD700),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text("+50 XP", style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold)),
-            ),
-          ),
-
-          // BOTTOM TEXT
+          // BOTTOM TEXT - Title, Subtitle
           Positioned(
             bottom: 12,
             left: 12,
