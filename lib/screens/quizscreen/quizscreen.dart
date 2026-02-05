@@ -2,22 +2,24 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:confetti/confetti.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/services.dart';
+import 'package:pankh/services/ser_user.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 
 // Internal Project Imports
-import 'package:pankh/constants/appTokens.dart';
-import 'package:pankh/models/modBird.dart';
-import 'package:pankh/widgets/widQuizHelper.dart';
-import 'package:pankh/widgets/widQuizOptions.dart';
-import 'package:pankh/widgets/uihelper.dart';
-
-import '../../services/serBird.dart';
-
-
+import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/models/mod_bird.dart';
+import 'package:pankh/widgets/wid_quizhelper.dart';
+import 'package:pankh/widgets/wid_quizoptionhelper.dart';
+import 'package:pankh/widgets/wid_uihelper.dart';
+import '../../services/ser_auth.dart';
+import '../../services/ser_bird.dart';
+import '../../widgets/wid_dialog.dart';
 
 class QuizScreen extends StatefulWidget {
   final VoidCallback onQuit;
@@ -33,22 +35,24 @@ class _QuizScreenState extends State<QuizScreen> {
   final AudioPlayer _audioPlayer = AudioPlayer(); // For logic
   late PlayerController _waveformController; // For visuals
   late ConfettiController _confettiController;
-  static final Dio _dio = Dio();
+
 
   // --- State Variables ---
-  List<modBird> birds = [];
+  List<ModBird> birds = [];
   bool isLoading = true;
   int currentIndex = 0;
-  int correctCount = 0;
   int currentHintIndex = 0;
+  int correctCount = 0;
+  bool _isWrong = false;
   int countdown = 3;
+  int quizDurationMins = 2;
   bool isQuizStarted = false;
   QuestionType currentType = QuestionType.image;
+  List<Map<String, String>> _currentQuestionOptions = [];
   List<String> hints = [];
 
-
   // --- Timers & Notifiers ---
-  final ValueNotifier<Duration> _timerNotifier = ValueNotifier(const Duration(minutes: 2));
+  late final ValueNotifier<Duration> _timerNotifier = ValueNotifier(Duration(minutes: quizDurationMins)); // change duration of quiz here
   Timer? _countdownTimer;
   Timer? _quizTimer;
 
@@ -70,13 +74,16 @@ class _QuizScreenState extends State<QuizScreen> {
     if (mounted) {
       setState(() => isLoading = true);
       try {
-        final data = await BirdService.getBirds(limitRows:5, filterColumn:"urbanOccurance",filterValue: widget.difficulty);
+        final data = SerBird.getBirds(
+            limitRows: 10, // Or however many questions you want
+            filterColumn: "urbanOccurrence",
+            filterValue: widget.difficulty
+        );
         setState(() {
-
           isLoading = false;
           birds = data;
         });
-      } catch (e) {print("Error fetching birds: $e");}
+      } catch (e) {}
       if (birds.isNotEmpty) _startInitialCountdown();
     }
   }
@@ -111,13 +118,14 @@ class _QuizScreenState extends State<QuizScreen> {
     hints = [
       "Habitat: ${bird.habitat}",
       "Order: ${bird.order}",
-      "Hindi name: ${bird.hindiName}",
-      "Marathi name: ${bird.marathiName}",
+      "Hindi name: ${bird.hindiNames}",
+      "Marathi name: ${bird.marathiNames}",
       "Lore: ${bird.folkStory}",
       "Personal Observation: ${bird.personalObservation}",
     ];
+    _currentQuestionOptions = _generateOptions();
     if (currentType == QuestionType.audio && birds.isNotEmpty) {
-      _playBirdSound(bird.gitAudio[0]);
+      _playBirdSound(bird.gitAudioURLs[0]);
     }
   }
 
@@ -142,17 +150,36 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _handleAnswer(String selectedName) {
-    _waveformController.stopPlayer(); // Stop sound when answered
+    _waveformController.stopPlayer();
 
     if (selectedName == birds[currentIndex].birdName) {
       _confettiController.play();
       setState(() => correctCount++);
-    }
 
+      // Optional: Add a small delay for correct answers too
+      // so they can see the confetti before the bird disappears!
+      Future.delayed(const Duration(milliseconds: 600), () => _proceedToNext());
+    } else {
+      HapticFeedback.heavyImpact();
+
+      setState(() => _isWrong = true);
+
+      // WAIT for the user to see the "Red Alert" before switching birds
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (mounted) {
+          setState(() => _isWrong = false);
+          _proceedToNext();
+        }
+      });
+    }
+  }
+
+  void _proceedToNext() {
     if (currentIndex < birds.length - 1) {
       setState(() {
         currentIndex++;
         currentHintIndex = 0;
+        // Randomize question type for the next bird
         currentType = QuestionType.values[Random().nextInt(QuestionType.values.length)];
       });
       _prepareQuestionMedia();
@@ -169,38 +196,42 @@ class _QuizScreenState extends State<QuizScreen> {
     final String? action = await WidQuizHelper.showResults(
         context,
         correctCount,
-        birds.length
+        birds.length,
+        SerUser.isGuest,
     );
+    if (action == null) {
+      widget.onQuit();
+      return;
+    }
 
     // 2. Handle the choice here where the state lives
-    if (action == "restart") {
-      // Reset variables so the UI looks fresh
-      setState(() {
-        currentIndex = 0;
-        correctCount = 0;
-        currentHintIndex = 0;
-        countdown = 3;
-        isQuizStarted = false;
-        _timerNotifier.value = const Duration(minutes: 2);
-      });
+    switch (action) {
+      case "login":
+        WidDialog.showLoadingDialog(context);
+        User? user = await SerAuth().signInWithGoogle(pendingXP: 100);
+        Navigator.pop(context); // 2. Close the Loading Dialog
 
-      // Call your init method to fetch new birds
-      _initializeQuiz();
-
-    } else if (action == "exit") {
-      widget.onQuit(); // This calls the Navigator.pop(context) you passed in
+        if (user != null) {
+          await WidDialog.showAuthSuccessDialog(context, user.displayName ?? "Birder");
+          widget.onQuit();
+        }
+        break;
+      case "restart":
+        _resetGameState();
+        _initializeQuiz();
+        break;
     }
   }
 
-// Add this helper to clean up the state before restarting
   void _resetGameState() {
-    setState(() {
+    setState(() async {
       currentIndex = 0;
       correctCount = 0;
       currentHintIndex = 0;
       countdown = 3;
       isQuizStarted = false;
-      _timerNotifier.value = const Duration(minutes: 2); // Reset timer
+      _timerNotifier.value = Duration(minutes: quizDurationMins);
+      await WidQuizHelper.showDifficultyPicker(context);
     });
   }
 
@@ -240,8 +271,6 @@ class _QuizScreenState extends State<QuizScreen> {
             children: [
               _buildTopHeader(),
 
-
-
               // Progress Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -253,8 +282,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     const SizedBox(width: 10),
                     ValueListenableBuilder<Duration>(
                       valueListenable: _timerNotifier,
-                      builder: (context, time, _) =>
-                          WidQuizHelper.infoChip(WidQuizHelper.formatTime(time)),
+                      builder: (context, time, _) => WidQuizHelper.infoChip(WidQuizHelper.formatTime(time)),
                     ),
                   ],
                 ),
@@ -265,7 +293,10 @@ class _QuizScreenState extends State<QuizScreen> {
               // Media Stage (Image or Audio)
               WidQuizHelper.buildMediaWrapper(
                 isQuizStarted: isQuizStarted,
-                mediaWidget: _buildMediaContent(birds[currentIndex]),
+                mediaWidget: ClipRRect(
+                  borderRadius: BorderRadius.circular(16), // Ensures the red overlay doesn't leak out of corners
+                  child: _buildMediaContent(birds[currentIndex]),
+                ),
               ),
 
               const SizedBox(height: 10),
@@ -305,7 +336,7 @@ class _QuizScreenState extends State<QuizScreen> {
         children: [
           const SizedBox(width: 48), // Spacer to center title
           const Spacer(),
-          UiHelper.CustomText(
+          UiHelper.customText(
             text: "Pankh Quiz",
             fontFamily: AppFonts.fontFamilyLogo,
             fontSize: AppFontSizes.fontSizeTitleBig,
@@ -323,7 +354,7 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
-  Widget _buildMediaContent(modBird bird) {
+  Widget _buildMediaContent(ModBird bird) {
     // 1. Determine the media widget based on currentType
     Widget mediaWidget;
 
@@ -342,7 +373,7 @@ class _QuizScreenState extends State<QuizScreen> {
       case QuestionType.audio:
         mediaWidget = WidQuizHelper.buildAudioUI(
           controller: _waveformController,
-          onReplay: () => _playBirdSound(bird.gitAudio[0]),
+          onReplay: () => _playBirdSound(bird.gitAudioURLs[0]),
         );
         break;
 
@@ -354,6 +385,17 @@ class _QuizScreenState extends State<QuizScreen> {
       children: [
         // media based on QuestionType
         mediaWidget,
+
+        // Red Flash on Wrong answer
+        Positioned.fill(
+          child: IgnorePointer( // Add this so the overlay doesn't block clicks
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 150),
+              opacity: _isWrong ? 0.4 : 0.0,
+              child: Container(color: AppColors.colRed),
+            ),
+          ),
+        ),
 
         // Confetti Layer
         Positioned(
@@ -378,13 +420,13 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Widget _buildOptionsArea() {
     // Generate the 4 options for this specific question
-    final currentOptions = _generateOptions();
+    _generateOptions();
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
       child: WidQuizOptions(
-        options: currentOptions, // Now only 4 birds (1 correct, 3 wrong)
+        options: _currentQuestionOptions, // Now only 4 birds (1 correct, 3 wrong)
         optionSize: currentType.optionSize,
         onOptionSelected: (selectedName) => _handleAnswer(selectedName),
       ),
@@ -395,14 +437,14 @@ class _QuizScreenState extends State<QuizScreen> {
     final correctBird = birds[currentIndex];
 
     // 1. Create a list of all birds EXCEPT the correct one
-    List<modBird> others = birds.where((b) => b.birdName != correctBird.birdName).toList();
+    List<ModBird> others = birds.where((b) => b.birdName != correctBird.birdName).toList();
 
     // 2. Shuffle the 'others' and take 3
     others.shuffle();
-    List<modBird> distractors = others.take(3).toList();
+    List<ModBird> distractors = others.take(3).toList();
 
     // 3. Combine correct bird + 3 distractors
-    List<modBird> quizOptions = [correctBird, ...distractors];
+    List<ModBird> quizOptions = [correctBird, ...distractors];
 
     // 4. Shuffle again so the correct answer isn't always at index 0
     quizOptions.shuffle();
@@ -413,22 +455,6 @@ class _QuizScreenState extends State<QuizScreen> {
     }).toList();
   }
 
-  Future<void> _showExitConfirmation() async {
-    final bool? quit = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Quit Quiz?"),
-        content: const Text("Your current progress will be lost."),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("STAY")),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("QUIT")),
-        ],
-      ),
-    );
-    if (quit == true) widget.onQuit();
-  }
-
-// Inside _QuizScreenState
   Future<String> _downloadAndGetPath(String url) async {
     if (url.isEmpty) return "";
 
@@ -457,4 +483,28 @@ class _QuizScreenState extends State<QuizScreen> {
       return ""; // Handle failure gracefully
     }
   }
+
+  Future<void> _showExitConfirmation() async {
+    final String? result = await WidDialog.customDialog(
+      context,
+      "Quit Quiz?",
+      // Body widget
+      UiHelper.customText(
+        text: "Your current progress will be lost!",
+        color: AppColors.colOnPrimary,
+        fontSize: AppFontSizes.fontSizeSubtitle,
+        fontFamily: AppFonts.fontFamilySubtitle,
+      ),
+      // Pills
+      [
+        DialogPill(label: "Stay", action: "stay"),
+        DialogPill(label: "Quit", action: "quit"),
+      ],
+    );
+
+    if (result == "quit") {
+      widget.onQuit();
+    }
+  }
+
 }

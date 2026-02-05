@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/uihelper.dart';
-import 'package:pankh/constants/appTokens.dart';
+import '../../../widgets/wid_uihelper.dart';
+import 'package:pankh/constants/app_tokens.dart';
 
 class WidQuizOptions extends StatelessWidget {
   final List<Map<String, String>> options;
@@ -83,7 +83,7 @@ class WidQuizOptions extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha:0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           )
@@ -95,7 +95,7 @@ class WidQuizOptions extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             // Bird Image background
-            UiHelper.CustomImage(
+            UiHelper.customImage(
               img: imgPath,
               fit: BoxFit.cover,
             ),
@@ -106,8 +106,8 @@ class WidQuizOptions extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.1),
-                    Colors.black.withOpacity(0.7), // Slightly darker for legibility
+                    Colors.black.withValues(alpha:0.1),
+                    Colors.black.withValues(alpha:0.7), // Slightly darker for legibility
                   ],
                 ),
               ),
@@ -117,7 +117,7 @@ class WidQuizOptions extends StatelessWidget {
               alignment: Alignment.bottomCenter,
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
-                child: UiHelper.CustomText(
+                child: UiHelper.customText(
                     text: name,
                     textAlign: TextAlign.center,
                     color: AppColors.colOnPrimary,
@@ -144,18 +144,18 @@ class WidQuizOptions extends StatelessWidget {
           horizontal: 15.0,
         ),
         decoration: BoxDecoration(
-          color: AppColors.colSecondary.withOpacity(0.7),
+          color: AppColors.colSecondary.withValues(alpha:0.7),
           borderRadius: BorderRadius.circular(30), // Keeps the "pill" shape
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha:0.2),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Center(
-          child: UiHelper.CustomText(text: text, textAlign: TextAlign.center, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle)
+          child: UiHelper.customText(text: text, textAlign: TextAlign.center, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle)
 
 
         ),

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../../../widgets/uihelper.dart';
-import 'package:pankh/constants/appTokens.dart';
-import '../../../widgets/widBotMenu.dart';
-import '../../../widgets/widHeader.dart';
+import '../../../widgets/wid_uihelper.dart';
+import 'package:pankh/constants/app_tokens.dart';
+import '../../../widgets/wid_footermenu.dart';
+import '../../../widgets/wid_header.dart';
 import 'package:pankh/screens/quizscreen/quizscreen.dart';
-import '../../models/modBird.dart';
-import '../../widgets/widQuizHelper.dart';
-import '../buyscreen/buyScreen.dart';
-import '../explorescreen/exploreScreen.dart';
-import '../groupscreen/groupScreen.dart';
+import '../../models/mod_bird.dart';
+import '../../widgets/wid_quizhelper.dart';
+import '../buyscreen/buyscreen.dart';
+import '../explorescreen/explorescreen.dart';
+import '../groupscreen/groupscreen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final List<modBird> carouselBirds; // Add this
+  final List<ModBird> carouselBirds; // Add this
   const HomeScreen({super.key, required this.carouselBirds});
 
   @override
@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
   int? expandedIndex;
-  late List<modBird> carouselBirds;
+  late List<ModBird> carouselBirds;
 
   /// Handles Navigation Logic
   Future<void> onItemTapped(int index) async {
@@ -68,13 +68,33 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     extendBody: true,
+  //     extendBodyBehindAppBar: false,
+  //     appBar: const WidHeader(),
+  //
+  //     // IndexedStack keeps states alive (e.g. scroll positions) when switching tabs
+  //     body: _getSelectedPage(),
+  //
+  //     bottomNavigationBar: WidBotMenu(
+  //       selectedIndex: selectedIndex,
+  //       onItemTapped: onItemTapped,
+  //     ),
+  //   );
+  // }
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
+      // 1. CHANGE THIS TO FALSE
+      extendBody: false,
+
+      // 2. KEEP THIS FALSE (Unless you want your header to float over content)
       extendBodyBehindAppBar: false,
+
       appBar: const WidHeader(),
 
-      // IndexedStack keeps states alive (e.g. scroll positions) when switching tabs
+      // IndexedStack is perfect here; it prevents the Explore page
+      // from reloading/scrolling to top every time you switch back.
       body: _getSelectedPage(),
 
       bottomNavigationBar: WidBotMenu(
@@ -84,16 +104,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
   // --- HOME TAB CONTENT ---
 
 
   Widget _buildHomeContent() {
     return Column(
       children: [
+        const SizedBox(height: 20),
         // 1. Move the location tag here if you only want it on the Home tab
-        const SizedBox(height: 10),
         const _LocationTag(),
+        const SizedBox(height: 20),
 
         // 2. The Carousel
         Expanded(
@@ -135,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 /// Isolated Card Widget to prevent heavy UI repaints
 class BirdCarouselCard extends StatelessWidget {
-  final modBird bird;
+  final ModBird bird;
   final bool isExpanded;
   final VoidCallback onToggle;
 
@@ -159,7 +179,7 @@ class BirdCarouselCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               // 1. BACKGROUND IMAGE
-              UiHelper.CustomImage(
+              UiHelper.customImage(
                 img: bird.gitImageURL,
                 width: double.infinity,
                 height: double.infinity,
@@ -180,7 +200,7 @@ class BirdCarouselCard extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.85),
+                          Colors.black.withValues(alpha:0.85),
                         ],
                       ),
                     ),
@@ -203,16 +223,16 @@ class BirdCarouselCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            UiHelper.CustomText(
+                            UiHelper.customText(
                               text: bird.birdName,
                               color: AppColors.colOnPrimary,
                               fontSize: AppFontSizes.fontSizeTitleBig,
                               fontWeight: FontWeight.bold,
                               fontFamily: AppFonts.fontFamilyTitle,
                             ),
-                            UiHelper.CustomText(
-                              text: bird.hindiName.isNotEmpty ? bird.hindiName[0] : "",
-                              color: AppColors.colOnPrimary.withOpacity(0.9),
+                            UiHelper.customText(
+                              text: bird.hindiNames.isNotEmpty ? bird.hindiNames[0] : "",
+                              color: AppColors.colOnPrimary.withValues(alpha:0.9),
                               fontSize: AppFontSizes.fontSizeBody,
                               fontFamily: AppFonts.fontFamilyDevnagari,
                             ),
@@ -222,7 +242,7 @@ class BirdCarouselCard extends StatelessWidget {
                       GestureDetector(
                         onTap: onToggle,
                         child: CircleAvatar(
-                          backgroundColor: AppColors.colOnPrimary.withOpacity(0.4),
+                          backgroundColor: AppColors.colOnPrimary.withValues(alpha:0.4),
                           radius: 22,
                           child: Icon(
                             Icons.keyboard_arrow_up,
@@ -246,7 +266,7 @@ class BirdCarouselCard extends StatelessWidget {
                   height: 250,
                   padding: const EdgeInsets.all(25),
                   decoration: BoxDecoration(
-                    color: AppColors.colPrimary.withOpacity(0.6),
+                    color: AppColors.colPrimary.withValues(alpha:0.6),
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(50)),
                   ),
                   child: Column(
@@ -256,12 +276,14 @@ class BirdCarouselCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          UiHelper.CustomText(
-                              text: bird.birdName,
-                              color: AppColors.colOnPrimary,
-                              fontSize: AppFontSizes.fontSizeTitleBig,
-                              fontWeight: FontWeight.normal,
-                              fontFamily: AppFonts.fontFamilyTitle,
+                          Expanded (
+                            child: UiHelper.customText(
+                                text: bird.birdName,
+                                color: AppColors.colOnPrimary,
+                                fontSize: AppFontSizes.fontSizeTitle,
+                                fontWeight: FontWeight.normal,
+                                fontFamily: AppFonts.fontFamilyTitle,
+                            ),
                           ),
                           IconButton(
                             onPressed: onToggle,
@@ -272,7 +294,7 @@ class BirdCarouselCard extends StatelessWidget {
                       const SizedBox(height: 10),
                       Expanded(
                         child: SingleChildScrollView(
-                          child: UiHelper.CustomText(
+                          child: UiHelper.customText(
                               text: bird.folkStory + "\n\n" + bird.notableQuality,
                               color: AppColors.colOnPrimary,
                               fontSize: AppFontSizes.fontSizeBody,
@@ -302,13 +324,13 @@ class _LocationTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.colSecondary.withOpacity(0.2),
+        color: AppColors.colSecondary.withValues(alpha:0.2),
         borderRadius: BorderRadius.circular(50),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          UiHelper.CustomIcon(img: "iconNavPin.png", height: 40, width: 40),
+          UiHelper.customIcon(img: "iconNavPin.png", height: 40, width: 40),
           const SizedBox(width: 10),
           const Column(
             crossAxisAlignment: CrossAxisAlignment.start,

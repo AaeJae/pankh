@@ -1,7 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:pankh/services/ser_userhive.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:pankh/screens/splash/splashscreen.dart';
+import 'services/ser_birdhive.dart';
 
 
 void main() async{
@@ -12,6 +15,11 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await Hive.initFlutter();
+  await SerUserHive.init();
+  await SerBirdHive.init();
+
   runApp(const MyApp());
 }
 

@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/appTokens.dart';
-import 'package:pankh/screens/homescreen/homescreen.dart';
-import 'package:pankh/widgets/uihelper.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 // Import your service to initialize it
-import 'package:pankh/services/serBird.dart';
-import '../../models/modBird.dart';
+import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/screens/homescreen/homescreen.dart';
+import 'package:pankh/widgets/wid_uihelper.dart';
+import '../../models/mod_bird.dart';
+import '../../services/ser_bird.dart';
+import '../../services/ser_user.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key}); // Use super parameters
@@ -31,30 +34,42 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   /// Initialize all required services and data before moving to Home
   Future<void> _initializeApp() async {
-    // Start a stopwatch to ensure we show the splash for at least a minimum time (e.g. 1.5s)
-    // for branding, but don't exceed the actual time needed for data loading.
-    final stopwatch = Stopwatch()..start();
-    List<modBird> initialBirds = [];
+    final stopwatch = Stopwatch()..start(); // Start a stopwatch to ensure we show the splash for at least a minimum time (e.g. 1.5s) for branding, but don't exceed the actual time needed for data loading.
+    List<ModBird> initialBirds = [];
+
 
     try {
-      initialBirds = await BirdService.getBirds(limitRows: 5, filterColumn: null, filterValue: null);
-      for (var bird in initialBirds) {
-        if (bird.gitImageURL != "" && mounted) precacheImage(NetworkImage(bird.gitImageURL), context);
+      ///////////////////
+      // CHECK IF USER HAS A UID, IF NOT, GIVE
+      ///////////////////
+      final auth = FirebaseAuth.instance;
+      if (auth.currentUser == null) {
+        await auth.signInAnonymously();
+        debugPrint("Logged in silently as Guest");
+      } else {
+        debugPrint("User already logged in: ${auth.currentUser!.uid}");
       }
+      await SerUser.checkUserExists();
+      SerUser.startListening();
+
+      ////////////////////
+      // --- CAROUSEL BIRDS PRECACHE FROM GIT REPO URL VIA HIVE ---
+      ///////////////////
+      initialBirds = SerBird.getBirds(limitRows: 10); // Get 10 random birds for Carousel
+      for (var bird in initialBirds) {
+        if (bird.gitImageURL.isNotEmpty && mounted) {
+          precacheImage(NetworkImage(bird.gitImageURL), context); // Pre-cache images (Still needed since images are URLs to Git)
+        }
+      }
+      // end get carousel birds
+
     } catch (e) {
       debugPrint("Error during initialization: $e");
     } finally {
       final elapsed = stopwatch.elapsedMilliseconds;
-      if (elapsed < 3000) {
-        await Future.delayed(Duration(milliseconds: 3000 - elapsed)); // Ensure the splash is visible for at least 1.5 seconds for UX/Branding
-      }
+      if (elapsed < 3000) await Future.delayed(Duration(milliseconds: 3000 - elapsed)); // Ensure the splash is visible for at least 3 seconds for UX/Branding
+      if (mounted) Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => HomeScreen(carouselBirds: initialBirds)));
 
-      if (mounted) {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomeScreen(carouselBirds: initialBirds))
-        );
-      }
     }
   }
 
@@ -85,7 +100,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               child: RepaintBoundary(
                 child: RotationTransition(
                   turns: _rotationController,
-                  child: UiHelper.CustomSvg(
+                  child: UiHelper.customSvg(
                       img: "svgSwirl.svg",
                       height: 550,
                       width: 550,
@@ -99,18 +114,18 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  UiHelper.CustomImage(
+                  UiHelper.customImage(
                       img: "appIcon.png",
                       width: MediaQuery.of(context).size.width * 0.2
                   ),
-                  UiHelper.CustomText(
+                  UiHelper.customText(
                     text: "Pankh",
                     color: AppColors.colWhite,
                     fontSize: AppFontSizes.fontSizeLogo,
                     fontFamily: AppFonts.fontFamilyLogo,
                     fontWeight: FontWeight.bold,
                   ),
-                  UiHelper.CustomText(
+                  UiHelper.customText(
                       text: "Birding | Quizzing | Community",
                       color: AppColors.colWhite,
                       fontSize: AppFontSizes.fontSizeTitle,
@@ -120,7 +135,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   const SizedBox(height: 30),
 
                   Center(
-                    child: UiHelper.CustomImage(
+                    child: UiHelper.customImage(
                         img: "SplashMiddleGraphics.png",
                         height: 379,
                         width: MediaQuery.of(context).size.width * 0.9
@@ -131,7 +146,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      UiHelper.CustomText(
+                      UiHelper.customText(
                         text: "Made with ❤️ for Bharat",
                         color: AppColors.colWhite,
                         fontSize: AppFontSizes.fontSizeTitle,

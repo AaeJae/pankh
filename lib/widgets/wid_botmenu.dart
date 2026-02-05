@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'uihelper.dart'; // Ensure correct path
-import 'package:pankh/constants/appTokens.dart';
+import 'wid_uihelper.dart'; // Ensure correct path
+import 'package:pankh/constants/app_tokens.dart';
 
 class WidBotMenu extends StatelessWidget {
   final int selectedIndex;
@@ -28,7 +28,7 @@ class WidBotMenu extends StatelessWidget {
             bottom: 0,
             child: RepaintBoundary(
               child: IgnorePointer(
-                child: UiHelper.CustomImage(
+                child: UiHelper.customImage(
                   img: "imgBotGraphics.png",
                   width: screenWidth,
                   fit: BoxFit.fitWidth,
@@ -40,17 +40,17 @@ class WidBotMenu extends StatelessWidget {
 
           // 2. THE GLASS MORPHIC BAR
           Positioned(
-            bottom: 35,
+            bottom: 50,
             left: 20,
             right: 20,
             child: Container(
               height: 65,
               decoration: BoxDecoration(
-                color: AppColors.colSecondary.withOpacity(0.7), // Deep Matte Green
+                color: AppColors.colSecondary.withValues(alpha:0.7), // Deep Matte Green
                 borderRadius: BorderRadius.circular(40),
                 // boxShadow: [
                 //   BoxShadow(
-                //     color: Colors.black.withOpacity(0.3),
+                //     color: Colors.black.withValues(alpha:0.3),
                 //     blurRadius: 25,
                 //     offset: const Offset(0, 12),
                 //   ),
@@ -71,7 +71,7 @@ class WidBotMenu extends StatelessWidget {
 
           // 3. THE MODERN BLITZ BUTTON
           Positioned(
-            bottom: 25,
+            bottom: 40,
             child: GestureDetector(
               onTap: () => onItemTapped(4),
               child: Stack(
@@ -85,7 +85,7 @@ class WidBotMenu extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.colWhite.withOpacity(0.3),
+                          color: AppColors.colWhite.withValues(alpha:0.3),
                           blurRadius: 20,
                           spreadRadius: 3,
                         )
@@ -111,13 +111,13 @@ class WidBotMenu extends StatelessWidget {
                   // THE ICON: Minimalist Lightning
                   Icon(
                     Icons.bolt_rounded,
-                    color: AppColors.colOnTertiary.withOpacity(0.3), // Sunset Gold
+                    color: AppColors.colOnTertiary.withValues(alpha:0.3), // Sunset Gold
                     size: 65,
                     shadows: const [
                       Shadow(color: Colors.black26, offset: Offset(0, 4), blurRadius: 10)
                     ],
                   ),
-                  UiHelper.CustomText(text:"Play \n BLITZ",textAlign: TextAlign.center, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppFonts.fontFamilyCaption, fontWeight: FontWeight.normal,),
+                  UiHelper.customText(text:"Play \n BLITZ",textAlign: TextAlign.center, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppFonts.fontFamilyCaption, fontWeight: FontWeight.normal,),
 
                 ],
               ),
@@ -141,7 +141,7 @@ class WidBotMenu extends StatelessWidget {
             color: isSelected ? const Color(0xFFFFB703) : Colors.white60,
           ),
           const SizedBox(height: 4),
-          UiHelper.CustomText(text:label, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeCaption, fontFamily: AppFonts.fontFamilyCaption, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,),
+          UiHelper.customText(text:label, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeCaption, fontFamily: AppFonts.fontFamilyCaption, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,),
         ],
       ),
     );

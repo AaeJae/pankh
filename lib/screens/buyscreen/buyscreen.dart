@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/widBotMenu.dart';
-import '../../widgets/widHeader.dart';
-
-
 class BuyScreen extends StatefulWidget {
   const BuyScreen({super.key});
 
@@ -16,6 +12,7 @@ class _BuyScreen extends State<BuyScreen> {
   void initState() {
     super.initState();
   }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
 
