@@ -1,39 +1,48 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:pankh/services/ser_userhive.dart';
-import 'firebase_options.dart';
 import 'package:flutter/material.dart';
-import 'package:pankh/screens/splash/splashscreen.dart';
+import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:pankh/constants/app_tokens.dart';
+
+import 'firebase_options.dart';
+// Custom packages
 import 'services/ser_birdhive.dart';
+import 'services/ser_userhive.dart';
+import 'package:pankh/screens/splash/splashscreen.dart';
 
-
-void main() async{
-  // 1. Bridges the Flutter framework with the host platform (Android/iOS)
+void main() async {
+  // 1. Bridges Flutter with the platform
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 2. Starts Firebase using your generated AppIDs
+  await Hive.initFlutter(); //
+  // 2. Start Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await Hive.initFlutter();
+  // 3. Initialize Hive Services
+  // We move Hive.initFlutter() inside these inits for cleaner architecture
   await SerUserHive.init();
   await SerBirdHive.init();
+  await Hive.openBox('settings');
 
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Pankh',
+      theme: ThemeData(
+        useMaterial3: true,
+        primarySwatch: Colors.green, // Fits the birding theme!
+      ),
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: SplashScreen(),
+      home: const SplashScreen(),
     );
   }
 }

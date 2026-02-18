@@ -1,28 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import '../../models/mod_bird.dart';
-import '../../services/ser_thirdpartydata.dart';
+import '../questscreen/questspatialmapscreen.dart';
 
-class BuyScreen extends StatefulWidget {
+class BuyScreen extends StatelessWidget {
   const BuyScreen({super.key});
-  @override
-  State<BuyScreen> createState() => _BuyScreenState();
-}
-
-class _BuyScreenState extends State<BuyScreen> {
-  final ThirdPartyDataService _dataService = ThirdPartyDataService();
-
-  @override
-  void initState() {
-    super.initState();
-    //ThirdPartyDataService.ebirdNearbyBirds("Thane");
-  }
-
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text("Console Test Running...")),
+    return Scaffold(
+      appBar: AppBar(title: const Text("Staging Area")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("MVP Buy Screen Placeholder"),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.map_outlined),
+              label: const Text("Preview Quest Map"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () {
+                // 🚀 This navigates to your new spatial map
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => QuestSpatialMapScreen()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

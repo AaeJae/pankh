@@ -70,21 +70,55 @@ class AppBorderRadius {
 enum QuestionType {
   image("small"),
   audio("big");
-
   final String optionSize;
-
   const QuestionType(this.optionSize);
 }
 
 enum QuizLevel {
-  beginner('Beginner', 'Common'),
-  intermediate('Intermediate', 'Occasional'),
-  expert('Expert', 'Rare');
-
+  beginner('Beginner', 'P0, P1'),
+  intermediate('Intermediate', 'P2, P3'),
+  expert('Expert', 'P4');
   final String displayText;   // What the user sees
   final String databaseValue; // What Firebase searches for
-
   const QuizLevel(this.displayText, this.databaseValue);
 }
 
 
+/////////////////////// SHOULD IDEALLY REPLACE WITH HOTSPOTSBIRDMAPPING IN FIREBASE from MONGODB
+enum SupportedCity {
+  mumbai(
+    id: "IN-MH-MS",
+    name: "Mumbai",
+    boundingBox: "72.74,19.35,73.20,18.88",
+  ),
+  thane(
+    id: "IN-MH-TH",
+    name: "Thane",
+    boundingBox: "72.90,19.33,73.10,19.15",
+  );
+
+  // Members are final and initialized via constructor
+  final String id;
+  final String name;
+  final String boundingBox;
+
+  const SupportedCity({
+    required this.id,
+    required this.name,
+    required this.boundingBox,
+  });
+
+  // Helper to get all city names for the search query
+  static String get allNames => SupportedCity.values.map((c) => c.name).join(" ");
+}
+
+
+
+// ColoredBox(
+// color: Colors.blue,
+// child: SizedBox(
+// width: 100,
+// height: 100,
+// child: const Text("Sized and Colored"),
+// ),
+// ),

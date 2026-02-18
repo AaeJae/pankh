@@ -1,154 +1,235 @@
-class PankhMaster {
-  static const int id = 0;
-  static const int birdName = 1;
-  static const int gitAudioURL1 = 2;
-  static const int gitAudioURL2 = 3;
-  static const int gitAudioURL3 = 4;
-  static const int gitImageURL = 5;
-  static const int gitImageSilhouetteURL = 6;
-  static const int gitImagePartURL = 7;
-  static const int hindiNames = 8;
-  static const int marathiNames = 9;
-  static const int folkStory = 10;
-  static const int order = 11;
-  static const int family = 12;
-  static const int genus = 13;
-  static const int species = 14;
-  static const int region = 15;
-  static const int habitat = 16;
-  static const int urbanOccurrence = 17;
-  static const int conservationStatus = 18;
-  static const int notableQuality = 19;
-  static const int personalObservation = 20;
-}
+import 'package:hive/hive.dart';
+part 'mod_bird.g.dart'; // Run: flutter packages pub run build_runner build
 
-class ModBird {
-  final int birdID;
+@HiveType(typeId: 0)
+class ModBird extends HiveObject {
+  @HiveField(0)
+  final int birdID; // int
+
+  @HiveField(1)
+  final String rank;
+
+  @HiveField(2)
   final String birdName;
-  final List<String> gitAudioURLs;
-  final String gitImageURL;
-  final String gitImageSilhouetteURL;
-  final String gitImagePartURL;
+
+  @HiveField(3)
+  final String sciName;
+
+  @HiveField(4)
+  final String eBirdCode;
+
+  @HiveField(5)
   final List<String> hindiNames;
+
+  @HiveField(6)
   final List<String> marathiNames;
-  final String folkStory;
-  final String order;
-  final String family;
-  final String genus;
-  final String species;
-  final String region;
-  final String habitat;
-  final String urbanOccurrence;
-  final String conservationStatus;
-  final String notableQuality;
-  final String personalObservation;
+
+  @HiveField(7)
+  final String lore;
+
+  @HiveField(8)
+  final String quality;
+
+  @HiveField(9)
+  final List<BirdImage> birdImages;
+
+  @HiveField(10)
+  final List<BirdAudio> birdAudios;
+
+  @HiveField(11)
+  final BirdInfo birdInfo;
+
+  @HiveField(12)
+  final String syncVersion;
 
   ModBird({
-    required this.birdID,
+    required this.birdID, // int
+    required this.rank,
     required this.birdName,
-    required this.gitAudioURLs,
-    required this.gitImageURL,
-    required this.gitImageSilhouetteURL,
-    required this.gitImagePartURL,
+    required this.sciName,
+    required this.eBirdCode,
+    required this.lore,
+    required this.quality,
     required this.hindiNames,
     required this.marathiNames,
-    required this.folkStory,
+    required this.birdImages,
+    required this.birdAudios,
+    required this.birdInfo,
+    required this.syncVersion,
+  });
+
+  // Factory to parse Firebase / JSON
+  factory ModBird.fromFirestore(Map<String, dynamic> data, {String? manualVersion}) {
+    return ModBird(
+      birdID: data['birdID'] is String
+          ? int.parse(data['birdID'])
+          : (data['birdID'] ?? 0),
+      rank: data['rank'] ?? '',
+      birdName: data['birdName'] ?? '',
+      sciName: data['sciName'] ?? '',
+      eBirdCode: data['eBirdCode'] ?? '',
+      lore: data['lore'] ?? '',
+      quality: data['quality'] ?? '',
+      hindiNames: List<String>.from(data['hindiNames'] ?? []),
+      marathiNames: List<String>.from(data['marathiNames'] ?? []),
+      birdImages: (data['birdImages'] as List? ?? [])
+          .map((i) => BirdImage.fromMap(i))
+          .toList(),
+      birdAudios: (data['birdAudios'] as List? ?? [])
+          .map((a) => BirdAudio.fromMap(a))
+          .toList(),
+      birdInfo: BirdInfo.fromMap(data['birdInfo'] ?? {}),
+      syncVersion: manualVersion ?? '',
+    );
+  }
+  // Helper to handle unexpected Firebase types
+  static String _convertToString(dynamic value) {
+    if (value == null) return "";
+    if (value is String) return value;
+    // If it's a Firebase Timestamp, convert to ISO string
+    if (value.runtimeType.toString() == 'Timestamp') {
+      return value.toDate().toIso8601String();
+    }
+    return value.toString();
+  }
+  // Getter for the Featured Image (Safe Fallback)
+  BirdImage get featuredImage => birdImages.firstWhere(
+        (img) => img.isFeatured,
+    orElse: () => birdImages.isNotEmpty
+        ? birdImages.first
+        : BirdImage(imageURL: '', isFeatured: false, source: 'Unknown',  sourceCreator: 'Unknown', sourceCreatorFull: 'Unknown', sourceLicense: 'Unknown'),
+  );
+}
+
+@HiveType(typeId: 1)
+class BirdInfo {
+  @HiveField(0)
+  final String order;
+  @HiveField(1)
+  final String family;
+  @HiveField(2)
+  final String genus;
+  @HiveField(3)
+  final String specie;
+  @HiveField(4)
+  final String iucnStatus;
+  @HiveField(5)
+  final double kgMass; // double or int?
+  @HiveField(6)
+  final String habitat;
+  @HiveField(7)
+  final String diet;
+  @HiveField(8)
+  final String mating;
+  @HiveField(9)
+  final String breeding;
+  @HiveField(10)
+  final String parasitism;
+  @HiveField(11)
+  final String flight;
+  @HiveField(12)
+  final String movement;
+
+  BirdInfo({
     required this.order,
     required this.family,
     required this.genus,
-    required this.species,
-    required this.region,
+    required this.specie,
+    required this.iucnStatus,
+    required this.kgMass, //double or int?
     required this.habitat,
-    required this.urbanOccurrence,
-    required this.conservationStatus,
-    required this.notableQuality,
-    required this.personalObservation,
+    required this.diet,
+    required this.mating,
+    required this.breeding,
+    required this.parasitism,
+    required this.flight,
+    required this.movement,
   });
 
-  // Helper to split comma-separated strings safely
-  static List<String> _splitNames(dynamic value) {
-    if (value == null || value.toString().isEmpty) return [];
-    return value.toString().split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-  }
+  factory BirdInfo.fromMap(Map<dynamic, dynamic> map) => BirdInfo(
+    order: map['order'] ?? '',
+    family: map['family'] ?? '',
+    genus: map['genus'] ?? '',
+    specie: map['specie'] ?? '',
+    iucnStatus: map['iucnStatus'] ?? '',
+    kgMass: (map['kgMass'] as num?)?.toDouble() ?? 0.0, // double or int?
+    habitat: map['habitat'] ?? '',
+    diet: map['diet'] ?? '',
+    mating: map['mating'] ?? '',
+    breeding: map['breeding'] ?? '',
+    parasitism: map['parasitism'] ?? '',
+    flight: map['flight'] ?? '',
+    movement: map['movement'] ?? '',
+  );
 
-  // 1. Convert CSV Row (List) to Bird Object
-  factory ModBird.fromCsv(List<dynamic> row) {
-    // Collect non-empty audio URLs using your PankhMaster constants
-    List<String> audios = [];
-    if (row[PankhMaster.gitAudioURL1]?.toString().isNotEmpty ?? false) audios.add(row[PankhMaster.gitAudioURL1].toString());
-    if (row[PankhMaster.gitAudioURL2]?.toString().isNotEmpty ?? false) audios.add(row[PankhMaster.gitAudioURL2].toString());
-    if (row[PankhMaster.gitAudioURL3]?.toString().isNotEmpty ?? false) audios.add(row[PankhMaster.gitAudioURL3].toString());
 
-    return ModBird(
-      birdID: int.tryParse(row[PankhMaster.id].toString()) ?? 0,
-      birdName: row[PankhMaster.birdName]?.toString() ?? '',
-      gitAudioURLs: audios,
-      gitImageURL: row[PankhMaster.gitImageURL]?.toString() ?? '',
-      gitImageSilhouetteURL: row[PankhMaster.gitImageSilhouetteURL]?.toString() ?? '',
-      gitImagePartURL: row[PankhMaster.gitImagePartURL]?.toString() ?? '',
-      hindiNames: _splitNames(row[PankhMaster.hindiNames]),
-      marathiNames: _splitNames(row[PankhMaster.marathiNames]),
-      folkStory: row[PankhMaster.folkStory]?.toString() ?? '',
-      order: row[PankhMaster.order]?.toString() ?? '',
-      family: row[PankhMaster.family]?.toString() ?? '',
-      genus: row[PankhMaster.genus]?.toString() ?? '',
-      species: row[PankhMaster.species]?.toString() ?? '',
-      region: row[PankhMaster.region]?.toString() ?? '',
-      habitat: row[PankhMaster.habitat]?.toString() ?? '',
-      urbanOccurrence: row[PankhMaster.urbanOccurrence]?.toString() ?? '',
-      conservationStatus: row[PankhMaster.conservationStatus]?.toString() ?? '',
-      notableQuality: row[PankhMaster.notableQuality]?.toString() ?? '',
-      personalObservation: row[PankhMaster.personalObservation]?.toString() ?? '',
-    );
-  }
+}
 
-  // 2. Convert Bird Object to Map (for Hive storage)
-  Map<String, dynamic> toMap() {
-    return {
-      'birdID': birdID,
-      'birdName': birdName,
-      'gitAudioURLs': gitAudioURLs,
-      'gitImageURL': gitImageURL,
-      'gitImageSilhouetteURL': gitImageSilhouetteURL,
-      'gitImagePartURL': gitImagePartURL,
-      'hindiNames': hindiNames,
-      'marathiNames': marathiNames,
-      'folkStory': folkStory,
-      'order': order,
-      'family': family,
-      'genus': genus,
-      'species': species,
-      'region': region,
-      'habitat': habitat,
-      'urbanOccurrence': urbanOccurrence,
-      'conservationStatus': conservationStatus,
-      'notableQuality': notableQuality,
-      'personalObservation': personalObservation,
-    };
-  }
+@HiveType(typeId: 2)
+class BirdImage {
+  @HiveField(0)
+  final String imageURL;
+  @HiveField(1)
+  final bool isFeatured; // boolean
+  @HiveField(2)
+  final String source;
+  @HiveField(3)
+  final String sourceCreator;
+  @HiveField(4)
+  final String sourceCreatorFull;
+  @HiveField(5)
+  final String sourceLicense;
 
-  // 3. Create Bird Object from Map (when reading from Hive)
-  factory ModBird.fromMap(Map<dynamic, dynamic> map) {
-    return ModBird(
-      birdID: map['birdID'] ?? 0,
-      birdName: map['birdName'] ?? '',
-      gitAudioURLs: List<String>.from(map['gitAudioURLs'] ?? []),
-      gitImageURL: map['gitImageURL'] ?? '',
-      gitImageSilhouetteURL: map['gitImageSilhouetteURL'] ?? '',
-      gitImagePartURL: map['gitImagePartURL'] ?? '',
-      hindiNames: List<String>.from(map['hindiNames'] ?? []),
-      marathiNames: List<String>.from(map['marathiNames'] ?? []),
-      folkStory: map['folkStory'] ?? '',
-      order: map['order'] ?? '',
-      family: map['family'] ?? '',
-      genus: map['genus'] ?? '',
-      species: map['species'] ?? '',
-      region: map['region'] ?? '',
-      habitat: map['habitat'] ?? '',
-      urbanOccurrence: map['urbanOccurrence'] ?? '',
-      conservationStatus: map['conservationStatus'] ?? '',
-      notableQuality: map['notableQuality'] ?? '',
-      personalObservation: map['personalObservation'] ?? '',
-    );
-  }
+
+  BirdImage({
+    required this.imageURL,
+    required this.isFeatured, // boolean
+    required this.source,
+    required this.sourceCreator,
+    required this.sourceCreatorFull,
+    required this.sourceLicense,
+  });
+
+  factory BirdImage.fromMap(Map<dynamic, dynamic> map) => BirdImage(
+    imageURL: map['imageURL'] ?? '',
+    isFeatured: map['isFeatured'] ?? false,
+    source: map['source'] ?? '',
+    sourceCreator: map['sourceCreator'] ?? '',
+    sourceCreatorFull: map['sourceCreatorFull'] ?? '',
+    sourceLicense: map['sourceLicense'] ?? '',
+  );
+}
+
+@HiveType(typeId: 3)
+class BirdAudio {
+  @HiveField(0)
+  final String audioURL;
+  @HiveField(1)
+  final String audioType;
+  @HiveField(2)
+  final int length; // int
+  @HiveField(3)
+  final String source;
+  @HiveField(4)
+  final String sourceCreator;
+  @HiveField(5)
+  final String sourceLicense;
+
+  BirdAudio({
+    required this.audioURL,
+    required this.audioType,
+    required this.length, // int
+    required this.source,
+    required this.sourceCreator,
+    required this.sourceLicense,
+  });
+
+  factory BirdAudio.fromMap(Map<dynamic, dynamic> map) => BirdAudio(
+    audioURL: map['audioURL'] ?? '',
+    audioType: map['audioType'] ?? '',
+    length: map['length'] ?? 0, // int
+    source: map['source'] ?? '',
+    sourceCreator: map['sourceCreator'] ?? '',
+    sourceLicense: map['sourceLicense'] ?? '',
+  );
 }

@@ -74,10 +74,14 @@ class _QuizScreenState extends State<QuizScreen> {
     if (mounted) {
       setState(() => isLoading = true);
       try {
+        List<String> difficultyList = widget.difficulty
+            .split(',')
+            .map((e) => e.trim())
+            .toList();
         final data = SerBird.getBirds(
             limitRows: 10, // Or however many questions you want
-            filterColumn: "urbanOccurrence",
-            filterValue: widget.difficulty
+            filterColumn: "rank",
+            filterValue: difficultyList
         );
         setState(() {
           isLoading = false;
@@ -116,16 +120,15 @@ class _QuizScreenState extends State<QuizScreen> {
     final bird = birds[currentIndex];
 
     hints = [
-      "Habitat: ${bird.habitat}",
-      "Order: ${bird.order}",
+      "Habitat: ${bird.birdInfo.habitat}",
+      "Order: ${bird.birdInfo.order}",
       "Hindi name: ${bird.hindiNames}",
       "Marathi name: ${bird.marathiNames}",
-      "Lore: ${bird.folkStory}",
-      "Personal Observation: ${bird.personalObservation}",
+      "Lore: ${bird.lore}",
     ];
     _currentQuestionOptions = _generateOptions();
     if (currentType == QuestionType.audio && birds.isNotEmpty) {
-      _playBirdSound(bird.gitAudioURLs[0]);
+      _playBirdSound(bird.birdAudios[0].audioURL);
     }
   }
 
@@ -239,10 +242,11 @@ class _QuizScreenState extends State<QuizScreen> {
   void dispose() {
     _countdownTimer?.cancel();
     _quizTimer?.cancel();
+    _timerNotifier.dispose();
+    _audioPlayer.stop();
     _audioPlayer.dispose();
     _waveformController.dispose();
     _confettiController.dispose();
-    _timerNotifier.dispose();
     _waveformController.dispose();
     super.dispose();
   }
@@ -361,7 +365,7 @@ class _QuizScreenState extends State<QuizScreen> {
     switch (currentType) {
       case QuestionType.image:
         mediaWidget = Image.network(
-          bird.gitImageURL,
+          bird.featuredImage.imageURL,
           height: double.infinity,
           width: double.infinity,
           fit: BoxFit.cover,
@@ -373,7 +377,7 @@ class _QuizScreenState extends State<QuizScreen> {
       case QuestionType.audio:
         mediaWidget = WidQuizHelper.buildAudioUI(
           controller: _waveformController,
-          onReplay: () => _playBirdSound(bird.gitAudioURLs[0]),
+          onReplay: () => _playBirdSound(bird.birdAudios[0].audioURL),
         );
         break;
 
@@ -451,7 +455,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
     return quizOptions.map((b) => {
       "name": b.birdName,
-      "image": b.gitImageURL,
+      "image": b.featuredImage.imageURL,
     }).toList();
   }
 

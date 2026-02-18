@@ -15,10 +15,10 @@ class Debouncer {
   }
 }
 class WidLocationPicker extends StatefulWidget {
-  final Function(String) onLocationSelected;
+  final Function(String name, double lat, double lng) onLocationSelected;
   const WidLocationPicker({super.key, required this.onLocationSelected});
 
-  static void show(BuildContext context, Function(String) onSelected) {
+  static void showLocationBottomModal(BuildContext context, Function(String typedLocation, double lat, double lng) onSelected) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -39,13 +39,7 @@ class _WidLocationPickerState extends State<WidLocationPicker> {
   List<dynamic> _suggestions = [];
   bool _isLoading = false;
 
-  void _onSearchChanged(String query) {
-    // This stops the jank!
-    // It resets the timer on every keystroke.
-    _debouncer.run(() {
-      _fetchSuggestions(query);
-    });
-  }
+  void _onSearchChanged(String query) {_debouncer.run(() {_fetchSuggestions(query);});} // reduces jank while user types location
 
   // Fetch suggestions from Nominatim
   Future<void> _fetchSuggestions(String query) async {
@@ -53,15 +47,31 @@ class _WidLocationPickerState extends State<WidLocationPicker> {
       setState(() => _suggestions = []);
       return;
     }
-
     setState(() => _isLoading = true);
 
     try {
+      final String targetCities = SupportedCity.allNames;
       final url = Uri.parse(
-          'https://nominatim.openstreetmap.org/search?q=$query&format=json&addressdetails=1&limit=5');
+          'https://nominatim.openstreetmap.org/search'
+              '?q=$query $targetCities' // Search bias
+              '&format=json'
+              '&addressdetails=1'
+              '&countrycodes=in'
+              '&limit=15'
+      );
       final response = await http.get(url, headers: {'User-Agent': 'Pankh_Bird_App'});
-
       if (response.statusCode == 200) {
+        List<dynamic> rawResults = json.decode(response.body);
+
+        // STRICT FILTER: Only keep results that mention our enum city names
+        final filtered = rawResults.where((item) {
+          final displayName = item['display_name'].toString().toLowerCase();
+          return SupportedCity.values.any((city) =>
+              displayName.contains(city.name.toLowerCase())
+          );
+        }).toList();
+
+
         setState(() {
           _suggestions = json.decode(response.body);
           _isLoading = false;
@@ -126,8 +136,12 @@ class _WidLocationPickerState extends State<WidLocationPicker> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   onTap: () {
-                    widget.onLocationSelected(item['display_name']);
-                    Navigator.pop(context); // Close the sheet
+                    final name = item['display_name'];
+                    final lat = double.parse(item['lat']);
+                    final lng = double.parse(item['lon']);
+
+                    widget.onLocationSelected(name, lat, lng); // Pass all 3 back!
+                    Navigator.pop(context);
                   },
                 );
               },

@@ -10,7 +10,8 @@ class WidDialog {
       BuildContext context,
       String textTitle,
       Widget body,
-      List<DialogPill> pills, {
+      List<DialogPill> pills,
+      {
         bool canClose = false, // Changed default to false
       }) {
     return showDialog<String>(

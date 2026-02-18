@@ -4,12 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 // Import your service to initialize it
 import 'package:pankh/constants/app_tokens.dart';
-import 'package:pankh/screens/homescreen/homescreen.dart';
 import 'package:pankh/widgets/wid_uihelper.dart';
 import '../../models/mod_bird.dart';
 import '../../services/ser_bird.dart';
 import '../../services/ser_thirdpartydata.dart';
 import '../../services/ser_user.dart';
+import '../../services/ser_syncfirebasehive.dart';
+import '../homescreen/homescreen.dart';
+import '../quizscreen/quiz_binocsSpotter.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key}); // Use super parameters
@@ -41,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     try {
       ///////////////////
-      // CHECK IF USER HAS A UID, IF NOT, GIVE
+      // 1. CHECK IF USER HAS A UID, IF NOT, GIVE
       ///////////////////
       final auth = FirebaseAuth.instance;
       if (auth.currentUser == null) {
@@ -54,23 +56,54 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       SerUser.startListening();
 
       ////////////////////
-      // --- CAROUSEL BIRDS PRECACHE FROM GIT REPO URL VIA HIVE ---
+      // --- 2. SYNC FIREBASE TO HIVE - check the version first; it's very fast if no update is needed---
       ///////////////////
-      initialBirds = await ThirdPartyDataService.ebirdNearbyBirds("India"); // Get 10 random birds for Carousel
-      for (var bird in initialBirds) {
-        if (bird.gitImageURL.isNotEmpty && mounted) {
-          precacheImage(NetworkImage(bird.gitImageURL), context); // Pre-cache images (Still needed since images are URLs to Git)
+      await SerSyncFirebaseHive().syncBirds();
+
+
+      ////////////////////
+      // --- 3. CAROUSEL BIRDS - GET ANY 10 first from Hive, ideally wait for eBird nearby data and fetch those from Hive ---
+      ///////////////////
+      initialBirds = SerBird.getBirds(limitRows: 10);
+      if (initialBirds.isEmpty) {
+        // If still empty, the sync definitely failed or the box isn't being read correctly.
+        debugPrint("⚠️ Warning: initialBirds is still empty after sync!");
+      }
+      // Try to refine with eBird Nearby Data (with a timeout)
+      try {
+        final nearbyBirds = await ThirdPartyDataService.ebirdNearbyBirds().timeout(const Duration(seconds: 2));
+        debugPrint("Nearby birds from ebird: $nearbyBirds");
+
+        if (nearbyBirds != null && nearbyBirds.isNotEmpty) {
+          initialBirds = nearbyBirds;
+        }
+      } catch (_) {
+        debugPrint("Using default birds (eBird timed out/failed)");
+      }
+
+      ////////////////////
+      // --- 4. PRE_CACHE BIRDS - only what is needed for the carousel ---
+      ///////////////////
+      if (mounted) {
+        for (var bird in initialBirds) {
+          precacheImage(NetworkImage(bird.featuredImage.imageURL), context);
         }
       }
       // end get carousel birds
 
     } catch (e) {
-      debugPrint("Error during initialization: $e");
+      debugPrint("❌ Initialization error: $e");
     } finally {
+      stopwatch.stop();
       final elapsed = stopwatch.elapsedMilliseconds;
-      if (elapsed < 3000) await Future.delayed(Duration(milliseconds: 3000 - elapsed)); // Ensure the splash is visible for at least 3 seconds for UX/Branding
-      if (mounted) Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => HomeScreen(carouselBirds: initialBirds)));
-
+      if (elapsed < 2500) await Future.delayed(Duration(milliseconds: 2500 - elapsed));
+      debugPrint("✅ Initialbirds: $initialBirds");
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const BinocsSpotterScreen()),
+        );
+      }
     }
   }
 

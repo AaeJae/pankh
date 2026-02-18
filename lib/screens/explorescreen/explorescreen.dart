@@ -35,8 +35,25 @@ class _ExploreScreenState extends State<ExploreScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. FEATURED SECTION
-          UiHelper.buildSectionHeaderWithPills(title: "Featured"),
-          _buildFeaturedCarousel(),
+            WidSection(
+              title: "Featured Events", // Added a section title
+              isMagnified: true,        // Replaces the basic horizontal list feel
+              enlargeCenterPage: true,  // Gives it that "Featured" prominence
+              viewportFraction: 0.8,    // Matches your original 0.8 width logic
+              cardHeight: 200,          // Matches your original SizedBox height
+              autoPlay: true,           // Makes the "Featured" items dynamic
+              cardData: [
+                ChildCard(
+                  title: "Winter Migration",
+                  subtitle: "Discover Arctic Travelers",
+                  image: "assets/images/migration.png",
+                  parentPill: "Featured",
+                  topLeftBadge: "Featured",
+                  onTap: () => print("yay"),
+                ),
+                // ... add your other 2 items here
+              ],
+            ),
 
             const SizedBox(height: 30),
 
@@ -134,26 +151,5 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   // --- UI BUILDER METHODS ---
-
-
-  Widget _buildFeaturedCarousel() {
-    return SizedBox(
-      height: 200,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: 3,
-        itemBuilder: (context, index) => UiHelper.buildCard(
-          width: MediaQuery.of(context).size.width * 0.8,
-          title: "Winter Migration",
-          subtitle: "Discover Arctic Travelers",
-          hasTopLeftBadge: "Featured",
-        ),
-      ),
-    );
-  }
-
-
-
 
 }
