@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/constants/designtokens.dart';
 import 'package:pankh/widgets/wid_dialog.dart';
 import 'package:pankh/widgets/wid_uihelper.dart';
 
@@ -85,20 +85,26 @@ class _SizeMattersScreenState extends State<SizeMattersScreen> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // REFERENCE OBJECT (Mobile Phone)
-                  UiHelper.customImage(
-                    img: "mobilePhone.png",
-                    height: 250,
-                    fit: BoxFit.contain,
+                  // 1. Shift the Phone to the left
+                  Transform.translate(
+                    offset: const Offset(-60, 0),
+                    child: UiHelper.customImage(
+                      img: "mobilePhone.png",
+                      height: 250,
+                      fit: BoxFit.contain,
+                    ),
                   ),
 
-                  // ADJUSTABLE BIRD
-                  Transform.scale(
-                    scale: _currentScale,
-                    child: UiHelper.customSvg(
-                      img: "svgBulbul.svg",
-                      height: 250, // Base height matches phone for 1.0 scale
-                      color: AppColors.colPrimary,
+                  // 2. Shift the Bird to the right
+                  Transform.translate(
+                    offset: const Offset(60, 0),
+                    child: Transform.scale(
+                      scale: _currentScale,
+                      child: UiHelper.customSvg(
+                        img: "svgMapTreeBest.svg",
+                        height: 250,
+                        color: AppColors.colPrimary,
+                      ),
                     ),
                   ),
                 ],
@@ -156,5 +162,5 @@ class _SizeMattersScreenState extends State<SizeMattersScreen> {
         ],
       ),
     );
-  }1
+  }
 }

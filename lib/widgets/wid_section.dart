@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart'; // 🚀 Added package
-import '../constants/app_tokens.dart';
+import '../constants/designtokens.dart';
 import 'wid_uihelper.dart';
 
 class WidSection extends StatefulWidget {

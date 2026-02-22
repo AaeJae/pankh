@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pankh/widgets/wid_uihelper.dart';
 
-import '../constants/app_tokens.dart';
+import '../constants/designtokens.dart';
 import '../services/ser_user.dart';
 import '../services/ser_auth.dart';
 
@@ -25,7 +25,7 @@ class WidDialog {
             text: textTitle,
             color: AppColors.colWhite,
             fontSize: AppFontSizes.fontSizeTitle,
-            fontFamily: AppFonts.fontFamilyTitle,
+            fontFamily: AppTypography.fontTitle,
           ),
         ),
         content: Column(
@@ -60,7 +60,7 @@ class WidDialog {
             borderRadius: BorderRadius.circular(30),
           ),
           child: Center(
-              child: UiHelper.customText(text: label, color: AppColors.colWhite, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppFonts.fontFamilySubtitle)
+              child: UiHelper.customText(text: label, color: AppColors.colWhite, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppTypography.fontSubtitle)
           ),
         ),
       ),

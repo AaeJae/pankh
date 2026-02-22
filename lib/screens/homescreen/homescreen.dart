@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/constants/designtokens.dart';
 import '../../../widgets/wid_uihelper.dart';
 import '../../../widgets/wid_header.dart';
 import '../../../widgets/wid_footermenu.dart';

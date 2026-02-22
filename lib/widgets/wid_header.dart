@@ -4,7 +4,7 @@ import '../models/mod_user.dart';
 import '../screens/profilescreen/profilescreen.dart';
 import '../services/ser_user.dart';
 import '../widgets/wid_uihelper.dart';
-import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/constants/designtokens.dart';
 
 class WidHeader extends StatelessWidget implements PreferredSizeWidget {
   const WidHeader({super.key});
@@ -54,7 +54,7 @@ class WidHeader extends StatelessWidget implements PreferredSizeWidget {
                           UiHelper.customText(
                             text: "Hello, ${SerUser.displayName}!",
                             color: AppColors.colPrimary,
-                            fontFamily: AppFonts.fontFamilyTitle,
+                            fontFamily: AppTypography.fontTitle,
                             fontSize: AppFontSizes.fontSizeTitle,
                             fontWeight: FontWeight.w600,
                           ),
@@ -113,9 +113,9 @@ class WidHeader extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildCurrencyRow() {
     final items = [
-      {"icon": Icons.electric_bolt_sharp, "value": SerUser.currentXP, "color": AppColors.colTertiary},
-      {"icon": Icons.local_fire_department_sharp, "value": SerUser.currentStreak, "color": AppColors.colTertiary},
-      {"icon": Icons.volunteer_activism_sharp, "value": SerUser.currentKarma, "color": AppColors.colTertiary},
+      {"icon": Icons.electric_bolt_sharp, "value": SerUser.currentXP, "color": AppColors.colQuaternary},
+      {"icon": Icons.local_fire_department_sharp, "value": SerUser.currentStreak, "color": AppColors.colQuaternary},
+      {"icon": Icons.volunteer_activism_sharp, "value": SerUser.currentKarma, "color": AppColors.colQuaternary},
     ];
 
     return Row(

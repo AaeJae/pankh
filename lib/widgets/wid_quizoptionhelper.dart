@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../widgets/wid_uihelper.dart';
-import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/constants/designtokens.dart';
 
 class WidQuizOptions extends StatelessWidget {
   final List<Map<String, String>> options;
@@ -123,7 +123,7 @@ class WidQuizOptions extends StatelessWidget {
                     color: AppColors.colOnPrimary,
                     fontSize: AppFontSizes.fontSizeSubtitle, // Use a fixed size if AppFontSizes is failing
                     fontWeight: FontWeight.normal,
-                    fontFamily: AppFonts.fontFamilySubtitle
+                    fontFamily: AppTypography.fontSubtitle
                 ),
               ),
             ),

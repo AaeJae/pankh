@@ -3,15 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Import your service to initialize it
-import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/constants/designtokens.dart';
 import 'package:pankh/widgets/wid_uihelper.dart';
+import '../../constants/designSystemTester.dart';
 import '../../models/mod_bird.dart';
 import '../../services/ser_bird.dart';
 import '../../services/ser_thirdpartydata.dart';
 import '../../services/ser_user.dart';
 import '../../services/ser_syncfirebasehive.dart';
 import '../homescreen/homescreen.dart';
-import '../quizscreen/quiz_binocsSpotter.dart';
+import '../quizscreen/quiz_sizeMatters.dart';
+
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key}); // Use super parameters
@@ -101,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const BinocsSpotterScreen()),
+          MaterialPageRoute(builder: (context) => const DesignSystemScreen()),
         );
       }
     }
@@ -121,7 +124,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           gradient: RadialGradient(
             center: Alignment.center,
             radius: 1.0,
-            colors: [AppColors.colTertiary, AppColors.colSecondary],
+            colors: [AppColors.colQuaternary, AppColors.colSecondary],
           ),
         ),
         child: Stack(
@@ -156,14 +159,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     text: "Pankh",
                     color: AppColors.colWhite,
                     fontSize: AppFontSizes.fontSizeLogo,
-                    fontFamily: AppFonts.fontFamilyLogo,
+                    fontFamily: AppTypography.fontLogo,
                     fontWeight: FontWeight.bold,
                   ),
                   UiHelper.customText(
                       text: "Birding | Quizzing | Community",
                       color: AppColors.colWhite,
                       fontSize: AppFontSizes.fontSizeTitle,
-                      fontFamily: AppFonts.fontFamilySubtitle,
+                      fontFamily: AppTypography.fontSubtitle,
                       fontWeight: FontWeight.bold
                   ),
                   const SizedBox(height: 30),
@@ -184,7 +187,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         text: "Made with ❤️ for Bharat",
                         color: AppColors.colWhite,
                         fontSize: AppFontSizes.fontSizeTitle,
-                        fontFamily: AppFonts.fontFamilySubtitle,
+                        fontFamily: AppTypography.fontSubtitle,
                       ),
                     ],
                   ),

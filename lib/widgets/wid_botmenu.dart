@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'wid_uihelper.dart'; // Ensure correct path
-import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/constants/designtokens.dart';
 
 class WidBotMenu extends StatelessWidget {
   final int selectedIndex;
@@ -117,7 +117,7 @@ class WidBotMenu extends StatelessWidget {
                       Shadow(color: Colors.black26, offset: Offset(0, 4), blurRadius: 10)
                     ],
                   ),
-                  UiHelper.customText(text:"Play \n BLITZ",textAlign: TextAlign.center, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppFonts.fontFamilyCaption, fontWeight: FontWeight.normal,),
+                  UiHelper.customText(text:"Play \n BLITZ",textAlign: TextAlign.center, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppTypography.fontCaption, fontWeight: FontWeight.normal,),
 
                 ],
               ),
@@ -141,7 +141,7 @@ class WidBotMenu extends StatelessWidget {
             color: isSelected ? const Color(0xFFFFB703) : Colors.white60,
           ),
           const SizedBox(height: 4),
-          UiHelper.customText(text:label, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeCaption, fontFamily: AppFonts.fontFamilyCaption, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,),
+          UiHelper.customText(text:label, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeCaption, fontFamily: AppTypography.fontCaption, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,),
         ],
       ),
     );

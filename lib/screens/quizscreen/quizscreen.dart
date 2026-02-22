@@ -12,7 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 
 // Internal Project Imports
-import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/constants/designtokens.dart';
 import 'package:pankh/models/mod_bird.dart';
 import 'package:pankh/widgets/wid_quizhelper.dart';
 import 'package:pankh/widgets/wid_quizoptionhelper.dart';
@@ -267,7 +267,7 @@ class _QuizScreenState extends State<QuizScreen> {
           gradient: RadialGradient(
             center: Alignment.center,
             radius: 1.2,
-            colors: [AppColors.colTertiary, AppColors.colSecondary],
+            colors: [AppColors.colQuaternary, AppColors.colSecondary],
           ),
         ),
         child: SafeArea(
@@ -342,7 +342,7 @@ class _QuizScreenState extends State<QuizScreen> {
           const Spacer(),
           UiHelper.customText(
             text: "Pankh Quiz",
-            fontFamily: AppFonts.fontFamilyLogo,
+            fontFamily: AppTypography.fontLogo,
             fontSize: AppFontSizes.fontSizeTitleBig,
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -497,7 +497,7 @@ class _QuizScreenState extends State<QuizScreen> {
         text: "Your current progress will be lost!",
         color: AppColors.colOnPrimary,
         fontSize: AppFontSizes.fontSizeSubtitle,
-        fontFamily: AppFonts.fontFamilySubtitle,
+        fontFamily: AppTypography.fontSubtitle,
       ),
       // Pills
       [

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/constants/designtokens.dart';
 import 'package:pankh/widgets/wid_uihelper.dart';
 
 import '../../widgets/wid_section.dart';

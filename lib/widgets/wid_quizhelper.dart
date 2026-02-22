@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:pankh/widgets/wid_dialog.dart';
 import 'wid_uihelper.dart';
-import 'package:pankh/constants/app_tokens.dart';
+import 'package:pankh/constants/designtokens.dart';
 
 class WidQuizHelper {
   /// DIFFICULTY PICKER
@@ -37,7 +37,7 @@ class WidQuizHelper {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withValues(alpha:0.1)),
       ),
-      child: UiHelper.customText(text: text, color: AppColors.colWhite, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppFonts.fontFamilySubtitle)
+      child: UiHelper.customText(text: text, color: AppColors.colWhite, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppTypography.fontSubtitle)
     );
   }
 
@@ -88,7 +88,7 @@ class WidQuizHelper {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const SizedBox(height: 40),
-        UiHelper.customText(text: "Listen to the bird's audio", color: AppColors.colWhite, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppFonts.fontFamilySubtitle),
+        UiHelper.customText(text: "Listen to the bird's audio", color: AppColors.colWhite, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppTypography.fontSubtitle),
         const SizedBox(height: 30),
 
         birdAudioVisualizer(controller: controller, waveColor: Colors.white),
@@ -212,7 +212,7 @@ class WidQuizHelper {
           colors: [Colors.transparent, Colors.black.withValues(alpha:0.85)],
         ),
       ),
-      child: UiHelper.customText(text: hintText, textAlign: TextAlign.center, color: AppColors.colWhite, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppFonts.fontFamilySubtitle),
+      child: UiHelper.customText(text: hintText, textAlign: TextAlign.center, color: AppColors.colWhite, fontSize: AppFontSizes.fontSizeSubtitle, fontFamily: AppTypography.fontSubtitle),
     );
   }
 

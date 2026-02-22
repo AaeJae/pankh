@@ -111,6 +111,17 @@ flutter:
         - asset: assets/fonts/KantumruyPro-Regular.ttf
         - asset: assets/fonts/KantumruyPro-SemiBold.ttf
         - asset: assets/fonts/KantumruyPro-Thin.ttf
+
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Light.ttf
+        - asset: assets/fonts/Poppins-ExtraLight.ttf
+        - asset: assets/fonts/Poppins-Thin.ttf
+
     - family: Laila
       fonts:
         - asset: assets/fonts/Laila-Bold.ttf
