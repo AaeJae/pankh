@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../widgets/wid_uihelper.dart';
-import 'package:pankh/constants/designtokens.dart';
+import 'package:pankh/constants/appDesignSystem.dart';
 
 class WidQuizOptions extends StatelessWidget {
   final List<Map<String, String>> options;
@@ -155,7 +155,7 @@ class WidQuizOptions extends StatelessWidget {
           ],
         ),
         child: Center(
-          child: UiHelper.customText(text: text, textAlign: TextAlign.center, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle)
+            child: UiHelper.customText(text: text, textAlign: TextAlign.center, color: AppColors.colOnPrimary, fontSize: AppFontSizes.fontSizeSubtitle)
 
 
         ),

@@ -6,7 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'dart:math' as math;
-import '../../constants/designtokens.dart';
+import '../../constants/appDesignTokens.dart';
 import '../../widgets/wid_uihelper.dart';
 import 'quest_map_modular_assets.dart';
 

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/widgets/wid_dialog.dart';
-import '../models/mod_user.dart';
+import 'package:pankh/constants/appDesignSystem.dart';
+import 'package:pankh/widgets/widDialog.dart';
 import '../screens/profilescreen/profilescreen.dart';
+import '../models/mod_user.dart';
 import '../services/ser_user.dart';
-import '../widgets/wid_uihelper.dart';
-import 'package:pankh/constants/designtokens.dart';
+
 
 class WidHeader extends StatelessWidget implements PreferredSizeWidget {
   const WidHeader({super.key});
@@ -14,35 +14,37 @@ class WidHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Get the height of the status bar/notch
-    final double topPadding = MediaQuery.of(context).padding.top;
-
     return Container(
-      // 2. Apply manual top padding instead of SafeArea
-      padding: EdgeInsets.only(top: topPadding),
-      color: Colors.transparent, // Or set a solid color if needed
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+      color: Colors.transparent,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Background Bird Graphics
-          Align(
-            alignment: Alignment.centerRight,
-            child: Opacity(
-              opacity: 0.7,
-              child: UiHelper.customImage(
-                img: "imgHeaderBirds.png",
-                height: 35,
-                width: MediaQuery.of(context).size.width * 0.7,
-              ),
-            ),
-          ),
+          // // Background Bird Graphics - Performance: Isolated for painting efficiency
+          // const Align(
+          //   alignment: Alignment.centerRight,
+          //   child: RepaintBoundary(
+          //     child: Opacity(
+          //       opacity: 0.7,
+          //       child: Image(
+          //         image: AssetImage("assets/images/imgHeaderBirds.png"),
+          //         height: 35,
+          //       ),
+          //     ),
+          //   ),
+          // ),
 
           Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 10),
+            padding: const EdgeInsets.only(
+                left: AppSizes.sizeXSmall,
+                right: AppSizes.sizeXSmall,
+                top: AppSizes.sizeXXSmall,
+                bottom: AppSizes.sizeXSmall
+            ),
             child: Row(
               children: [
-                _buildProfileAvatar(context),
-                const SizedBox(width: 12),
+                const _ProfileAvatar(), // Extracted to const widget for rebuild optimization
+                const SizedBox(width: AppSizes.sizeXSmall),
                 Expanded(
                   child: StreamBuilder<ModUser>(
                     stream: SerUser.userStream,
@@ -51,21 +53,17 @@ class WidHeader extends StatelessWidget implements PreferredSizeWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          UiHelper.customText(
-                            text: "Hello, ${SerUser.displayName}!",
-                            color: AppColors.colPrimary,
-                            fontFamily: AppTypography.fontTitle,
-                            fontSize: AppFontSizes.fontSizeTitle,
-                            fontWeight: FontWeight.w600,
+                          Text(
+                            "Hello, ${SerUser.displayName}!",
+                            style: AppTypography.subtitle1
                           ),
-                          _buildCurrencyRow(),
+                          const _CurrencyRow(), // Extracted for performance
                         ],
                       );
-
                     },
                   ),
                 ),
-                _buildActionIcons(),
+                const _ActionIcons(), // Extracted for performance
               ],
             ),
           ),
@@ -73,74 +71,86 @@ class WidHeader extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
+}
 
-  Widget _buildProfileAvatar(BuildContext context) {
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar();
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
         if (SerUser.isGuest) {
-          await WidDialog.showLoginDialog(context);
+          await WidDialog.showDialogLogin(context);
         } else {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
+          Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen())
+          );
         }
       },
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: AppColors.colOnTertiary,
+          const CircleAvatar(
+            radius: AppSizes.sizeMedium,
+            backgroundColor: AppColors.colTertiary, // Applied Design Token
             child: CircleAvatar(
-              radius: 21,
+              radius: AppSizes.sizeMedium - AppSizes.sizeXXSmall,
               backgroundColor: AppColors.colSecondary,
-              child: const Image(
-                image: AssetImage("assets/images/2.0x/imgProfilePic.png"),
-              ),
+              backgroundImage: AssetImage("assets/images/2.0x/imgProfilePic.png"),
             ),
           ),
-          Positioned(
-            top: -4,
-            left: 16,
-            child: Icon(
-              Icons.auto_awesome,
-              color: SerUser.isGuest ? Colors.grey.shade400 : AppColors.colOnTertiary,
-              size: 14,
-            ),
-          ),
+          // Positioned(
+          //   top: -4,
+          //   left: 16,
+          //   child: Icon(
+          //     Icons.auto_awesome,
+          //     color: SerUser.isGuest ? AppColors.colDisabled : AppColors.colTertiary,
+          //     size: 14,
+          //   ),
+          // ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildCurrencyRow() {
+class _CurrencyRow extends StatelessWidget {
+  const _CurrencyRow();
+
+  @override
+  Widget build(BuildContext context) {
+    // Stat items defined with Design Tokens
     final items = [
-      {"icon": Icons.electric_bolt_sharp, "value": SerUser.currentXP, "color": AppColors.colQuaternary},
-      {"icon": Icons.local_fire_department_sharp, "value": SerUser.currentStreak, "color": AppColors.colQuaternary},
-      {"icon": Icons.volunteer_activism_sharp, "value": SerUser.currentKarma, "color": AppColors.colQuaternary},
+      {"icon": Icons.electric_bolt_sharp, "value": SerUser.currentXP},
+      {"icon": Icons.local_fire_department_sharp, "value": SerUser.currentStreak},
+      {"icon": Icons.volunteer_activism_sharp, "value": SerUser.currentKarma},
     ];
 
     return Row(
       children: items.map((item) {
         return Container(
-          margin: const EdgeInsets.only(right: 6),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          margin: const EdgeInsets.only(right: AppSizes.sizeXXSmall),
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.sizeXSmall, vertical:1),
           decoration: BoxDecoration(
-            color: AppColors.colSecondary.withOpacity(0.8),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: (item["color"] as Color).withOpacity(0.1), width: 1),
+            color: AppColors.colSecondary,
+            borderRadius: BorderRadius.circular(AppSizes.sizeCircular),
           ),
           child: Row(
             children: [
               Icon(
                 item["icon"] as IconData,
-                color: item["color"] as Color,
-                size: 14,
+                color: AppColors.colOnSecondary,
+                size: AppSizes.sizeSmall - AppSizes.sizeXXXSmall,
               ),
-              const SizedBox(width: 4),
-              UiHelper.customText(
-                text: "${item["value"]}",
-                color: AppColors.colOnPrimary,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+              const SizedBox(width: AppSizes.sizeXXSmall),
+              Text(
+                "${item["value"]}",
+                style: AppTypography.label.copyWith(
+                  color: AppColors.colOnSecondary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -148,13 +158,26 @@ class WidHeader extends StatelessWidget implements PreferredSizeWidget {
       }).toList(),
     );
   }
+}
 
-  Widget _buildActionIcons() {
+class _ActionIcons extends StatelessWidget {
+  const _ActionIcons();
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.notifications_none_rounded, size: 28, color: AppColors.colPrimary.withOpacity(0.8)),
-        const SizedBox(width: 8),
-        Icon(Icons.settings_outlined, size: 28, color: AppColors.colPrimary.withOpacity(0.8)),
+        Icon(
+            Icons.notifications_none_rounded,
+            size: AppSizes.sizeMedium,
+            color: AppColors.colPrimary
+        ),
+        const SizedBox(width: AppSizes.sizeXSmall),
+        const Icon(
+            Icons.settings_outlined,
+            size: AppSizes.sizeMedium,
+            color: AppColors.colPrimary
+        ),
       ],
     );
   }

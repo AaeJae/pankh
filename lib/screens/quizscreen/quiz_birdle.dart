@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/designtokens.dart';
-import 'package:pankh/widgets/wid_uihelper.dart';
-import 'package:pankh/widgets/wid_quizhelper.dart';
+import 'package:pankh/constants/appDesignSystem.dart';
+import 'package:pankh/widgets/widQuizHelper.dart';
 
 class UserGuess {
   String diet = "";
@@ -291,13 +290,13 @@ class _QuizBirdleScreenState extends State<QuizBirdleScreen> {
                   child: Container(color: Colors.black.withOpacity(0.2)),
                 ),
               ),
-              Positioned(
-                top: 15, right: 15,
-                child: WidQuizHelper.infoChip(
-                  WidQuizHelper.formatTime(Duration(seconds: _secondsElapsed)),
-                  color: Colors.black.withOpacity(0.6),
-                ),
-              ),
+              // Positioned(
+              //   top: 15, right: 15,
+              //   // child: WidQuizHelper.infoChip(
+              //   //   WidQuizHelper.formatTime(Duration(seconds: _secondsElapsed)),
+              //   //   color: Colors.black.withOpacity(0.6),
+              //   // ),
+              // ),
               const Positioned(bottom: 15, left: 15, child: CircleAvatar(backgroundColor: Colors.white, child: Icon(Icons.volume_up, color: AppColors.colPrimary))),
             ],
           ),

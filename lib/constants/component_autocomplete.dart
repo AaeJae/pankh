@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'designtokens.dart';
+import 'appDesignTokens.dart';
 
 // Assuming your design tokens are in this file or imported
-// import 'package:pankh/constants/designtokens.dart';
+// import 'package:pankh/constants/appDesignTokens.dart';
 
 class AutocompleteOption {
   final String title;
@@ -78,7 +78,7 @@ class _AppAutocompleteState extends State<AppAutocomplete> {
             // Label Style
             if (widget.label != null)
               Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.spacingSmall, left: 4),
+                padding: const EdgeInsets.only(bottom: AppSizes.sizeXSmall, left: 4),
                 child: Text(
                   widget.label!,
                   style: AppTypography.caption.copyWith(
@@ -105,11 +105,11 @@ class _AppAutocompleteState extends State<AppAutocomplete> {
                   elevation: const WidgetStatePropertyAll(0),
                   backgroundColor: const WidgetStatePropertyAll(AppColors.colWhite),
                   padding: const WidgetStatePropertyAll(
-                    EdgeInsets.symmetric(horizontal: AppSpacing.spacingMedium),
+                    EdgeInsets.symmetric(horizontal: AppSizes.sizeSmall),
                   ),
                   // Border styling based on Focus and Error
                   shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadii.radiusSmall),
+                    borderRadius: BorderRadius.circular(AppSizes.sizeXSmall),
                     side: BorderSide(
                       color: state.hasError
                           ? AppColors.colError
@@ -120,7 +120,7 @@ class _AppAutocompleteState extends State<AppAutocomplete> {
                   leading: Icon(
                     widget.prefixIcon ?? Icons.search,
                     color: state.hasError ? AppColors.colError : AppColors.colSecondary,
-                    size: AppIconSizes.sizeMedium,
+                    size: AppSizes.sizeMedium,
                   ),
                   trailing: [
                     IconButton(
@@ -147,7 +147,7 @@ class _AppAutocompleteState extends State<AppAutocomplete> {
                 if (filtered.isEmpty) {
                   return [
                     const Padding(
-                      padding: EdgeInsets.all(AppSpacing.spacingMedium),
+                      padding: EdgeInsets.all(AppSizes.sizeSmall),
                       child: Text("No results found", style: AppTypography.caption),
                     )
                   ];
@@ -178,7 +178,7 @@ class _AppAutocompleteState extends State<AppAutocomplete> {
             // Error Message Style
             if (state.hasError)
               Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.spacingXSmall, left: 4),
+                padding: const EdgeInsets.only(top: AppSizes.sizeXXSmall, left: 4),
                 child: Text(
                   state.errorText!,
                   style: AppTypography.caption.copyWith(color: AppColors.colError),

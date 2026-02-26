@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/designtokens.dart';
+import 'package:pankh/constants/appDesignTokens.dart';
 
 class AppSkeleton extends StatefulWidget {
   final double? width;
@@ -11,7 +11,7 @@ class AppSkeleton extends StatefulWidget {
     super.key,
     this.width,
     this.height,
-    this.borderRadius = AppRadii.radiusSmall,
+    this.borderRadius = AppSizes.sizeXSmall,
     this.isCircle = false,
   });
 
@@ -31,7 +31,7 @@ class _AppSkeletonState extends State<AppSkeleton> with SingleTickerProviderStat
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AppDurations.slow, // Slightly slower for elegance
+      duration: AppDurations.durationSlow, // Slightly slower for elegance
     )..repeat();
 
     // Use a Curve to make the movement smoother (slow start/end)

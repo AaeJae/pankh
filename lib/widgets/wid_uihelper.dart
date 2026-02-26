@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../constants/designtokens.dart';
+import '../constants/appDesignTokens.dart';
 
 
 class UiHelper {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/designtokens.dart';
+import 'package:pankh/constants/appDesignTokens.dart';
 
 enum AppSheetVariant { defaultList, tabbed }
 
@@ -50,15 +50,15 @@ class AppSheet {
     return RawScrollbar(
       controller: tabScrollController,
       thumbColor: AppColors.colDisabled.withAlpha(AppAlpha.alphaMedium),
-      thickness: AppSpacing.spacingXSmall,
-      radius: const Radius.circular(AppRadii.radiusXLarge),
+      thickness: AppSizes.sizeXXSmall,
+      radius: const Radius.circular(AppSizes.sizeCircular),
       thumbVisibility: true,
       child: ListView.builder(
         controller: tabScrollController,
         shrinkWrap: true,
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: data.length,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacingSmall),
+        padding: const EdgeInsets.symmetric(vertical: AppSizes.sizeXSmall),
         itemBuilder: (context, index) =>
             ListTile(
               title: Text(data[index], style: AppTypography.body),
@@ -95,19 +95,19 @@ class AppModalBottomSheet extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(AppSpacing.spacingSmall,AppSpacing.spacingMedium, AppSpacing.spacingSmall, 0),
+          padding: EdgeInsets.fromLTRB(AppSizes.sizeXSmall,AppSizes.sizeSmall, AppSizes.sizeXSmall, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: AppTypography.subtitle1),
               if (subtitle != null) ...[
-                const SizedBox(height: AppSpacing.spacingXSmall),
+                const SizedBox(height: AppSizes.sizeXXSmall),
                 Text(subtitle!, style: AppTypography.caption),
               ],
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.spacingMedium),
+        const SizedBox(height: AppSizes.sizeSmall),
         if (!isTabbed) ...items,
         if (isTabbed) _buildTabbedLayout(context),
       ],
@@ -117,9 +117,9 @@ class AppModalBottomSheet extends StatelessWidget {
       width: double.infinity,
       decoration: const BoxDecoration(
         color: AppColors.colWhite,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.radiusMedium)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.sizeLarge)),
       ),
-      padding: EdgeInsets.fromLTRB(AppSpacing.spacingSmall,AppSpacing.spacingLarge, AppSpacing.spacingSmall, AppSpacing.spacingLarge),
+      padding: EdgeInsets.fromLTRB(AppSizes.sizeXSmall,AppSizes.sizeMedium, AppSizes.sizeXSmall, AppSizes.sizeMedium),
       child: isTabbed ? content : SingleChildScrollView(child: content),
     );
   }

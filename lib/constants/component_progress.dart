@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/designtokens.dart';
+import 'package:pankh/constants/appDesignTokens.dart';
 
 class AppProgress extends StatelessWidget {
   final double value; // 0.0 to 1.0
@@ -14,7 +14,7 @@ class AppProgress extends StatelessWidget {
     this.labelLeft,
     this.labelRight,
     this.color,
-    this.thickness = AppSpacing.spacingSmall, // Default per your request
+    this.thickness = AppSizes.sizeXXSmall, // Default per your request
   });
 
   @override
@@ -28,17 +28,17 @@ class AppProgress extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (labelLeft != null)
-                Text(labelLeft!, style: AppTypography.body),
+                Text(labelLeft!, style: AppTypography.subtitle2.copyWith(color: AppColors.colOnPrimary)),
               if (labelRight != null)
-                Text(labelRight!, style: AppTypography.bodyBold),
+                Text(labelRight!, style: AppTypography.subtitle2.copyWith(color: AppColors.colOnPrimary)),
             ],
           ),
-          const SizedBox(height: AppSpacing.spacingXSmall),
+          const SizedBox(height: AppSizes.sizeSmall),
         ],
 
         // The Progress Bar
         ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadii.radiusXLarge), // High rounding for pill shape
+          borderRadius: BorderRadius.circular(AppSizes.sizeCircular), // High rounding for pill shape
           child: LinearProgressIndicator(
             value: value,
             minHeight: thickness,

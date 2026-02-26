@@ -49,9 +49,10 @@ class AppTypography{
   static const String fontTitle = "Poppins"; // Abhaya Libre, Antic, Antic Didone, Arapey, Arima
   static const String fontSubtitle = "Poppins";
   static const String fontBody = "Poppins";
-  static const String fontCaption = "Poppins"; // Kan Reg 11, lh 150%
-  static const String fontControls = "Poppins"; // Kan Reg 11, lh 150%
-  static const String fontLink = "Poppins"; // Kan Reg 11, lh 150%
+  static const String fontCaption = "Poppins";
+  static const String fontLabel = "Poppins";
+  static const String fontControls = "Poppins";
+  static const String fontLink = "Poppins";
 
   //LOGO
   static const TextStyle logo = TextStyle(
@@ -130,6 +131,15 @@ class AppTypography{
     height: 1.4,
     letterSpacing: 0.0,
   );
+  // CAPTION
+  static const TextStyle label = TextStyle(
+    color: AppColors.colPrimary,
+    fontFamily: fontLabel,
+    fontSize: 9,
+    fontWeight: FontWeight.normal,
+    height: 1.1,
+    letterSpacing: 0.0,
+  );
 
   // LINKS TEXT
   static const TextStyle link = TextStyle(
@@ -175,44 +185,23 @@ class AppAlpha {
   static const int alphaHigh = 220; // For high-readability overlays
   static const int alphaOpaque = 255;
 }
-// ========================
-// BORDER RADIUS
-// ========================
-class AppRadii {
-  static const double radiusXSmall = 8.0;
-  static const double radiusSmall = 16.0;
-  static const double radiusMedium = 32.0;
-  static const double radiusLarge = 50.0;
-  static const double radiusXLarge = 999.0; // "Circular"
 
-  // Quick helper for your decorations
-  static BorderRadius radiusSm = BorderRadius.circular(radiusSmall);
-  static BorderRadius radiusMd = BorderRadius.circular(radiusMedium);
-}
 // ========================
 // SPACING
 // ========================
-class AppSpacing {
-  static const double spacingXSmall = 4.0;
-  static const double spacingSmall = 8.0;
-  static const double spacingMedium = 16.0;
-  static const double spacingLarge = 24.0;
-  static const double spacingXLarge = 32.0;
-  static const double spacingXXLarge = 48.0;
+class AppSizes {
+  static const double sizeXXXSmall = 2.0;
+  static const double sizeXXSmall = 4.0;
+  static const double sizeXSmall = 8.0;
+  static const double sizeSmall = 16.0;
+  static const double sizeMedium = 24.0;
+  static const double sizeLarge = 32.0;
+  static const double sizeXLarge = 48.0;
+  static const double sizeCircular = 999.0;
 
   // Screen-specific layout padding
   static const double screenEdge = 20.0;
   static const double bottomPanelPadding = 50.0;
-}
-
-// ========================
-// SIZES
-// ========================
-class AppIconSizes {
-  static const double sizeSmall = 18.0;
-  static const double sizeMedium = 24.0; // Standard
-  static const double sizeLarge = 32.0;
-  static const double sizeXLarge = 48.0;
 }
 // ========================
 // ELEVATION
@@ -260,9 +249,12 @@ class AppShadows {
 // MOTION
 // ========================
 class AppDurations {
-  static const Duration fast = Duration(milliseconds: 200);
-  static const Duration medium = Duration(milliseconds: 500);
-  static const Duration slow = Duration(milliseconds: 1000);
+  static const Duration durationFast = Duration(milliseconds: 200);
+  static const Duration durationMedium = Duration(milliseconds: 500);
+  static const Duration durationSlow = Duration(milliseconds: 1000);
+  static const Duration durationXSlow = Duration(milliseconds: 2000);
+  static const Duration durationXXSlow = Duration(milliseconds: 2500);
+  static const Duration durationXXXSlow = Duration(milliseconds: 3000);
 }
 
 // ========================
@@ -278,8 +270,9 @@ enum QuestionType {
 
 enum QuizLevel {
   beginner('Beginner', 'P0, P1'),
-  intermediate('Intermediate', 'P2, P3'),
-  expert('Expert', 'P4');
+  hobbyist('Hobbyist', 'P0,P1,P2'),
+  expert('Expert', 'P0,P1,P2,P3'),
+  purist('Purist', 'P0, P1, P2, P3, P4');
   final String displayText;   // What the user sees
   final String databaseValue; // What Firebase searches for
   const QuizLevel(this.displayText, this.databaseValue);

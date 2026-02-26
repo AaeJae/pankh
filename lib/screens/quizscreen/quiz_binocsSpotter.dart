@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/designtokens.dart';
-import 'package:pankh/widgets/wid_quizhelper.dart';
+import 'package:pankh/constants/appDesignTokens.dart';
+import 'package:pankh/widgets/widQuizHelper.dart';
 
-import '../../widgets/wid_dialog.dart';
+import 'package:pankh/constants/appDesignSystem.dart';
 import '../../widgets/wid_uihelper.dart';
 
 class BinocsSpotterScreen extends StatefulWidget {
@@ -139,10 +139,10 @@ class _BinocsSpotterScreenState extends State<BinocsSpotterScreen> {
           const Text("Time before bird flies: ",
               style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
           const SizedBox(height: 5),
-          WidQuizHelper.infoChip(
-            WidQuizHelper.formatTime(Duration(seconds: _secondsLeft)),
-            color: _secondsLeft < 10 ? Colors.red : Colors.black45,
-          ),
+          // WidQuizHelper.infoChip(
+          //   WidQuizHelper.formatTime(Duration(seconds: _secondsLeft)),
+          //   color: _secondsLeft < 10 ? Colors.red : Colors.black45,
+          // ),
         ],
       ),
     );
@@ -231,56 +231,56 @@ class _BinocsSpotterScreenState extends State<BinocsSpotterScreen> {
       //ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("BIRD SPOTTED! YOU WIN!")));
 
       // SUCCESS DIALOG
-      WidDialog.customDialog(
-        context,
-        "TARGET ACQUIRED!",
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.auto_awesome, color: Colors.white, size: 50),
-            const SizedBox(height: 15),
-            UiHelper.customText(
-              text: "Excellent eye! You spotted the $correctBirdName.",
-              color: Colors.white,
-              textAlign: TextAlign.center,
-              fontSize: AppFontSizes.fontSizeBody,
-            ),
-          ],
-        ),
-        [
-          DialogPill(label: "Collect XP", action: "collect_reward"),
-        ],
-        canClose: false,
-      ).then((action) {
-        if (action == "collect_reward") Navigator.pop(context);
-      });
+      // WidDialog.customDialog(
+      //   context,
+      //   "TARGET ACQUIRED!",
+      //   Column(
+      //     mainAxisSize: MainAxisSize.min,
+      //     children: [
+      //       const Icon(Icons.auto_awesome, color: Colors.white, size: 50),
+      //       const SizedBox(height: 15),
+      //       UiHelper.customText(
+      //         text: "Excellent eye! You spotted the $correctBirdName.",
+      //         color: Colors.white,
+      //         textAlign: TextAlign.center,
+      //         fontSize: AppFontSizes.fontSizeBody,
+      //       ),
+      //     ],
+      //   ),
+      //   [
+      //     DialogPill(label: "Collect XP", action: "collect_reward"),
+      //   ],
+      //   canClose: false,
+      // ).then((action) {
+      //   if (action == "collect_reward") Navigator.pop(context);
+      // });
 
     } else {
       //ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Not quite right. Keep looking!")));
       // FAILURE DIALOG
-      WidDialog.customDialog(
-        context,
-        "NOT QUITE...",
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.search_off, color: Colors.white, size: 50),
-            const SizedBox(height: 15),
-            UiHelper.customText(
-              text: !isCorrectSpot
-                  ? "The bird isn't in your viewfinder."
-                  : "Bird spotted, but it's not ${name}",
-              color: Colors.white,
-              textAlign: TextAlign.center,
-              fontSize: AppFontSizes.fontSizeBody,
-            ),
-          ],
-        ),
-        [
-          DialogPill(label: "Try Again", action: "retry"),
-        ],
-        canClose: true,
-      );
+      // WidDialog.customDialog(
+      //   context,
+      //   "NOT QUITE...",
+      //   Column(
+      //     mainAxisSize: MainAxisSize.min,
+      //     children: [
+      //       const Icon(Icons.search_off, color: Colors.white, size: 50),
+      //       const SizedBox(height: 15),
+      //       UiHelper.customText(
+      //         text: !isCorrectSpot
+      //             ? "The bird isn't in your viewfinder."
+      //             : "Bird spotted, but it's not ${name}",
+      //         color: Colors.white,
+      //         textAlign: TextAlign.center,
+      //         fontSize: AppFontSizes.fontSizeBody,
+      //       ),
+      //     ],
+      //   ),
+      //   [
+      //     DialogPill(label: "Try Again", action: "retry"),
+      //   ],
+      //   canClose: true,
+      // );
 
     }
   }

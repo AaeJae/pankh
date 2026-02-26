@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/designtokens.dart';
-import 'package:pankh/widgets/wid_uihelper.dart';
-// Added missing imports for data access
 import 'package:pankh/services/ser_user.dart';
 import 'package:pankh/models/mod_user.dart';
+import 'package:pankh/constants/appDesignSystem.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -16,8 +14,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      // We wrap the entire stream here so the header and stats update together
+      backgroundColor: AppColors.colBackground,
       body: StreamBuilder<ModUser>(
         stream: SerUser.userStream,
         builder: (context, snapshot) {
@@ -27,25 +24,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             physics: const ClampingScrollPhysics(),
             child: Column(
               children: [
-                // 1. Pass the user object to the header
                 _buildProfileHeader(user),
-
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    children: [
-                      // 2. Pass the user object to the stats overview
-                      _buildProfileStatsOverview(user),
-                      const SizedBox(height: 20),
-
-                      _buildAchievementsSection(),
-                      const SizedBox(height: 20),
-
-                      _buildActivitySection(),
-                    ],
-                  ),
-                ),
+                const SizedBox(height: AppSizes.sizeLarge),
+                _buildProfileStatsOverview(user),
+                const SizedBox(height: AppSizes.sizeSmall),
+                _buildAchievementsSection(),
+                const SizedBox(height: AppSizes.sizeSmall),
+                _buildCommunitySection(),
               ],
             ),
           );
@@ -60,91 +45,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
+          padding: const EdgeInsets.fromLTRB(AppSizes.screenEdge, AppSizes.sizeXLarge, AppSizes.screenEdge, AppSizes.sizeLarge),
           decoration: const BoxDecoration(
-            color: Color(0xFFF2E4B5),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(40),
-            ),
+            color: AppColors.colQuaternary, // Cream Mist
+            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(AppSizes.sizeLarge),),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Dynamic User DP or Initial
+              // Avatar
               Container(
-                width: 120,
-                height: 120,
+                width: 100,
+                height: 100,
                 decoration: const BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.colWhite,
                   shape: BoxShape.circle,
                 ),
-                child: Center(
-                  child: Text(
-                    user.name[0].toUpperCase(),
-                    style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold, color: AppColors.colPrimary),
-                  ),
-                ),
+                child: Center(child: Text(user.name[0].toUpperCase(), style: AppTypography.title1,),),
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: AppSizes.sizeSmall),
 
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    UiHelper.customText(
-                      text: user.name, // DYNAMIC NAME
-                      fontSize: AppFontSizes.fontSizeTitleBig,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.colPrimary,
+                    Text(user.name,
+                        style: AppTypography.title2
                     ),
-                    UiHelper.customText(
-                      text: user.isGuest ? "@guest-birder" : "@${user.name.toLowerCase().replaceAll(' ', '-')}",
-                      fontSize: AppFontSizes.fontSizeBody,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.colPrimary,
+                    Text(
+                      user.isGuest ? "@guest-birder" : "@${user.name.toLowerCase().replaceAll(' ', '-')}",
+                      style: AppTypography.subtitle2,
                     ),
-                    const SizedBox(height: 5),
-                    UiHelper.customText(
-                      text: user.isGuest ? "Sign in to choose tags" : "#Foodie #NatureLover #Dancer",
-                      fontSize: AppFontSizes.fontSizeCaption,
-                      fontWeight: FontWeight.normal,
-                      color: AppColors.colPrimary,
+                    const SizedBox(height: AppSizes.sizeXSmall),
+                    Text(
+                      user.isGuest ? "Sign in to choose tags" : "#Foodie #NatureLover #Dancer",
+                      style: AppTypography.caption,
                     ),
-                    const SizedBox(height: 5),
-                    UiHelper.customText(
-                      text: user.isGuest ? "Unranked" : "League: ${user.league}",
-                      fontSize: AppFontSizes.fontSizeCaption,
-                      fontWeight: FontWeight.normal,
-                      color: AppColors.colPrimary,
+                    const SizedBox(height: AppSizes.sizeXSmall),
+                    Text(
+                      user.isGuest ? "League: Unranked" : "League: ${user.league}",
+                      style: AppTypography.caption,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 15),
-              const Icon(Icons.edit, size: 25, color: AppColors.colPrimary),
+              const Icon(Icons.edit_outlined, size: AppSizes.sizeMedium, color: AppColors.colPrimary),
             ],
           ),
         ),
 
-        // BIRD PET SECTION
+        // Bird Pet Section
         Positioned(
-          bottom: -55,
-          right: 20,
+          bottom: -65,
+          right: AppSizes.screenEdge,
           child: Container(
-            width: 120,
+            width: 110,
             height: 90,
             decoration: BoxDecoration(
-              color: const Color(0xFFF2E4B5),
-              borderRadius: BorderRadius.circular(200),
+              color: AppColors.colQuaternary,
+              borderRadius: BorderRadius.circular(AppSizes.sizeCircular),
+              boxShadow: AppShadows.shadowSmall,
             ),
             child: const Center(
-              child: Icon(Icons.emoji_nature, size: 40, color: Colors.black87),
+              child: Icon(Icons.emoji_nature, size: AppSizes.sizeLarge, color: AppColors.colPrimary),
             ),
           ),
         ),
-
-        // end BIRD PET SECTION
-
       ],
     );
   }
@@ -153,114 +119,130 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10),
-        UiHelper.customText(
-          text: "Overview",
-          fontSize: AppFontSizes.fontSizeTitle,
-          fontWeight: FontWeight.bold,
-          color: AppColors.colPrimary,
+        AppSectionTitle(title: "OVERVIEW", subtitle: "Your stats on Pankh", showViewAll: false,),
+        const SizedBox(height: AppSizes.sizeXSmall),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.screenEdge),
+          child: Row(
+            children: [
+              _statItem("XP", "${user.xp}", Icons.bolt, const Color(0xFFE1F5FE)),
+              const SizedBox(width: AppSizes.sizeXSmall),
+              _statItem("Streak", "${user.streak}", Icons.local_fire_department, const Color(0xFFFFF3E0)),
+              const SizedBox(width: AppSizes.sizeXSmall),
+              _statItem("Karma", "${user.karma}", Icons.favorite_sharp, const Color(0xFFF1F8E9)),
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
-        Row(
+      ],
+    );
+  }
+
+  Widget _statItem(String label, String value, IconData icon, Color bgColor) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSizes.sizeXSmall),
+        decoration: BoxDecoration(
+          color: AppColors.colSurface,
+          borderRadius: BorderRadius.circular(AppSizes.sizeSmall),
+          boxShadow: AppShadows.shadowSmall,
+        ),
+        child: Column(
           children: [
-            // DYNAMIC STATS FROM CACHE/FIREBASE
-            UiHelper.statCardBuilder("XP", user.xp.toString(), Icons.bolt, const Color(0xFFE1F5FE)),
-            const SizedBox(width: 12),
-            UiHelper.statCardBuilder("Streak", user.streak.toString(), Icons.local_fire_department, const Color(0xFFFFF3E0)),
-            const SizedBox(width: 12),
-            UiHelper.statCardBuilder("Karma", user.karma.toString(), Icons.favorite_sharp, const Color(0xFFF1F8E9)),
+            Icon(icon, color: AppColors.colPrimary, size: AppSizes.sizeMedium),
+            const SizedBox(height: AppSizes.sizeXXSmall),
+            Text(value, style: AppTypography.subtitle2.copyWith(fontWeight: FontWeight.bold)),
+            Text(label, style: AppTypography.body),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAchievementsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AppSectionTitle(title: "ACHIEVEMENTS", subtitle: "Popular content this week", showViewAll: true, showViewAllLabel: true),
+        const SizedBox(height:AppSizes.sizeSmall),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.screenEdge),
+          child: SizedBox(
+            height: 80,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _achievementBadge("Early Bird", Icons.wb_twilight, true),
+                _achievementBadge("First Sighting", Icons.visibility, true),
+                _achievementBadge("Streak Master", Icons.local_fire_department, false),
+                _achievementBadge("Rare Finder", Icons.auto_awesome, false),
+                _achievementBadge("Rare Finder", Icons.auto_awesome, false),
+                _achievementBadge("Rare Finder", Icons.auto_awesome, false),
+                _achievementBadge("Rare Finder", Icons.auto_awesome, false),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  Widget _achievementBadge(String name, IconData icon, bool isUnlocked) {
+    return Padding(
+      padding: const EdgeInsets.only(right: AppSizes.sizeSmall),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: AppSizes.sizeMedium,
+            backgroundColor: isUnlocked ? AppColors.colSecondary : AppColors.colDisabled,
+            child: Icon(icon, color: AppColors.colWhite, size: AppSizes.sizeMedium),
+          ),
+          const SizedBox(height: AppSizes.sizeXXSmall),
+          Text(name, style: AppTypography.caption),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommunitySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppSectionTitle(title: "COMMUNITY", subtitle: "The Heart of Pankh", showViewAll: true, showViewAllLabel: true,),
+        AppTabContainer(
+          height: 300,
+          isScrollable: false,
+          tabs: [
+            AppTab(
+              label: "Posts",
+              content: [_buildEmptyState("No posts yet. Share your story!")],
+            ),
+            AppTab(
+              label: "Photos",
+              content: [_buildEmptyState("Your gallery is empty. Snapshot a bird!")],
+            ),
+            AppTab(
+              label: "Groups",
+              content: [_buildEmptyState("Join birding groups to connect!")],
+            ),
           ],
         ),
       ],
     );
   }
 
-  // TODO
-  Widget _buildAchievementsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        UiHelper.customText(
-          text: "Achievements",
-          fontSize: AppFontSizes.fontSizeTitle,
-          fontWeight: FontWeight.bold,
-          color: AppColors.colPrimary,
-        ),
-        const SizedBox(height: 15),
-        SizedBox(
-          height: 110,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              UiHelper.badgeBuilder("Early Bird", Icons.wb_twilight, isUnlocked: true),
-              UiHelper.badgeBuilder("First Sighting", Icons.remove_red_eye, isUnlocked: true),
-              UiHelper.badgeBuilder("Streak Master", Icons.local_fire_department, isUnlocked: false),
-              UiHelper.badgeBuilder("Rare Finder", Icons.auto_awesome, isUnlocked: false),
-              UiHelper.badgeBuilder("Guardian", Icons.shield, isUnlocked: false),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActivitySection() {
-    return DefaultTabController(
-      length: 3, // Posts, Photos, Groups
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          UiHelper.customText(
-            text: "Community",
-            fontSize: AppFontSizes.fontSizeTitle,
-            fontWeight: FontWeight.bold,
-            color: AppColors.colPrimary,
-          ),
-          const SizedBox(height: 10),
-
-          // The Tab Bar
-          TabBar(
-            labelColor: AppColors.colPrimary,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: AppColors.colOnTertiary,
-            indicatorWeight: 3,
-            tabs: const [
-              Tab(text: "Posts"),
-              Tab(text: "Photos"),
-              Tab(text: "Groups"),
-            ],
-          ),
-
-          // The Content Area
-          SizedBox(
-            height: 300, // Fixed height for the scrollable area
-            child: TabBarView(
-              children: [
-                _buildActivityList("No posts yet. Share your first birding story!"),
-                _buildActivityList("Your gallery is empty. Snapshot a bird!"),
-                _buildActivityList("You haven't joined any birding groups yet."),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActivityList(String emptyMessage) {
+  Widget _buildEmptyState(String message) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(40.0),
+        padding: const EdgeInsets.symmetric(vertical: AppSizes.sizeXLarge),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.hourglass_empty_rounded, color: Colors.grey[300], size: 50),
-            const SizedBox(height: 10),
-            UiHelper.customText(
-              text: emptyMessage,
+            const Icon(Icons.eco_outlined, color: AppColors.colDisabled, size: 48),
+            const SizedBox(height: AppSizes.sizeSmall),
+            Text(
+              message,
               textAlign: TextAlign.center,
-              color: Colors.grey,
-              fontSize: AppFontSizes.fontSizeCaption,
+              style: AppTypography.caption.copyWith(color: AppColors.colOnDisabled),
             ),
           ],
         ),

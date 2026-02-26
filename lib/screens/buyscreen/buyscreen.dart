@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pankh/constants/appDesignSystem.dart';
+import 'package:pankh/constants/designSystemTester.dart';
 import '../questscreen/questspatialmapscreen.dart';
 
 class BuyScreen extends StatelessWidget {
@@ -29,6 +31,12 @@ class BuyScreen extends StatelessWidget {
                 );
               },
             ),
+            AppButton(
+              label: "Design Tester",
+              onPressed: () {
+                Navigator.push(context,MaterialPageRoute(builder: (context) => DesignSystemScreen()));
+              },
+            )
           ],
         ),
       ),

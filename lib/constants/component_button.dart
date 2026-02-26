@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pankh/constants/designtokens.dart';
+import 'package:pankh/constants/appDesignTokens.dart';
 
 enum AppButtonVariant { solid, flat, ghost }
 enum AppButtonSize { small, medium, large }
@@ -21,8 +21,9 @@ class AppButton extends StatefulWidget {
     this.isLoading = false,
     this.icon,
     this.variant = AppButtonVariant.solid,
-    this.size = AppButtonSize.large,
+    this.size = AppButtonSize.medium,
     this.isIconOnly = false,
+
   });
 
   @override
@@ -38,7 +39,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AppDurations.fast,
+      duration: AppDurations.durationFast,
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
@@ -85,12 +86,12 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
             },
             onTapUp: (_) => _controller.reverse(),
             onTapCancel: () => _controller.reverse(),
-            borderRadius: BorderRadius.circular(AppRadii.radiusSmall),
+            borderRadius: BorderRadius.circular(AppSizes.sizeXLarge),
             // Reverted to standard splash; disabled for ghost/disabled
             splashColor: (isDisabled || isGhost) ? Colors.transparent : AppColors.colWhite.withOpacity(0.2),
             child: Padding(
               padding: EdgeInsets.symmetric(
-                  horizontal: widget.isIconOnly ? 0 : AppSpacing.spacingMedium
+                  horizontal: widget.isIconOnly ? 0 : AppSizes.sizeSmall
               ),
               child: Center(
                 child: _buildContent(isDisabled),
@@ -106,7 +107,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
     if (isDisabled && widget.variant == AppButtonVariant.solid) {
       return BoxDecoration(
         color: AppColors.colDisabled, // Using your 0xFFBDBDBD token
-        borderRadius: BorderRadius.circular(AppRadii.radiusSmall),
+        borderRadius: BorderRadius.circular(AppSizes.sizeLarge),
       );
     }
 
@@ -114,7 +115,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       case AppButtonVariant.flat:
         return BoxDecoration(
           color: AppColors.colSecondary.withAlpha(AppAlpha.alphaLow),
-          borderRadius: BorderRadius.circular(AppRadii.radiusSmall),
+          borderRadius: BorderRadius.circular(AppSizes.sizeLarge),
           boxShadow: AppShadows.shadowSmall,
         );
       case AppButtonVariant.ghost:
@@ -123,14 +124,14 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       default:
         return BoxDecoration(
           color: AppColors.colPrimary,
-          borderRadius: BorderRadius.circular(AppRadii.radiusSmall),
+          borderRadius: BorderRadius.circular(AppSizes.sizeLarge),
           boxShadow: AppShadows.shadowSmall,
         );
     }
   }
 
   Widget _buildContent(bool isDisabled) {
-    // Determine foreground color
+    // Determine foreground ce
     // Now includes isLoading check to ensure "Processing" state uses colOnDisabled
     final Color fg = (isDisabled || widget.isLoading)
         ? AppColors.colOnDisabled
@@ -146,10 +147,10 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
         // Show Loader if loading, else show Icon if provided
         if (widget.isLoading) ...[
           _buildLoader(fg),
-          if (!widget.isIconOnly) const SizedBox(width: AppSpacing.spacingSmall),
+          if (!widget.isIconOnly) const SizedBox(width: AppSizes.sizeXSmall),
         ] else if (widget.icon != null) ...[
           Icon(widget.icon, size: iconSize, color: fg),
-          if (!widget.isIconOnly) const SizedBox(width: AppSpacing.spacingSmall),
+          if (!widget.isIconOnly) const SizedBox(width: AppSizes.sizeXSmall),
         ],
 
         // Label

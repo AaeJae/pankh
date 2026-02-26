@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/designtokens.dart';
+import 'package:pankh/constants/appDesignSystem.dart';
 import 'package:pankh/widgets/wid_uihelper.dart';
-
-import '../../widgets/wid_section.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -34,122 +32,117 @@ class _ExploreScreenState extends State<ExploreScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. FEATURED SECTION
-            WidSection(
-              title: "Featured Events", // Added a section title
-              isMagnified: true,        // Replaces the basic horizontal list feel
-              enlargeCenterPage: true,  // Gives it that "Featured" prominence
-              viewportFraction: 0.8,    // Matches your original 0.8 width logic
-              cardHeight: 200,          // Matches your original SizedBox height
-              autoPlay: true,           // Makes the "Featured" items dynamic
-              cardData: [
-                ChildCard(
-                  title: "Winter Migration",
-                  subtitle: "Discover Arctic Travelers",
-                  image: "assets/images/migration.png",
-                  parentPill: "Featured",
-                  topLeftBadge: "Featured",
-                  onTap: () => print("yay"),
-                ),
-                // ... add your other 2 items here
+            /////////// 1. FEATURED SECTION
+            AppSectionTitle(
+              title: "FEATURED",
+              subtitle: "Popular content this week",
+              showViewAllLabel: false,
+              showViewAll: true,
+            ),
+            AppCarousel(
+              height: 200,
+              cardWidth: 350,
+              cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaLow),
+              viewportFraction: 0.75,
+              enlargeCenterPage: true,
+              autoplay: true,
+              scrollType: AppScrollType.infinite,
+              cards:[
+                AppCard(title: "Winter Migration", subtitle:"Discover Arctic Travellers",topLeftBadge:"Featured", topRightBadge: "+50XP",image: "https://picsum.photos/seed/bird9/200/300", ),
+                AppCard(title: "Bird Fashion Week", subtitle:"Who wore it best?",topLeftBadge:"Featured", topRightBadge: "+50XP",image: "https://picsum.photos/seed/bird1/200/300", ),
               ],
             ),
+            const SizedBox(height: AppSizes.sizeSmall),
 
-            const SizedBox(height: 30),
 
-            // 2. QUESTS SECTION
-            WidSection(
-              title: "Quests",
-              defaultFilter: "Balcony Birding",
-              cardHeight: 200,
-              cardWidth: 200,
-              pills: [
-                {'label': 'Balcony Birding', 'isLocked': false},
-                {'label': 'Field Trip', 'isLocked': false},
-                {'label': 'Migration Specialist', 'isLocked': true},
-              ],
-              cardData: [
-                ChildCard(
-                  title: "Sparrows",
-                  subtitle: "5 Questions",
-                  image: "https://picsum.photos/seed/bird/200/300",
-                  parentPill: "Balcony Birding",
-                  onTap: () => print("Clicked Sparrows"),
-                ),
-                ChildCard(
-                  title: "Crows",
-                  subtitle: "15 Questions",
-                  image: "https://picsum.photos/seed/bird/200/300",
-                  parentPill: "Balcony Birding",
-                  topLeftBadge: "Featured",
-                  topRightBadge: "+50XP",
-                  onTap: () => print("Clicked Sparrows"),
-                ),
-                ChildCard(
-                  title: "Crows",
-                  subtitle: "15 Questions",
-                  image: "https://picsum.photos/seed/bird/200/300",
-                  parentPill: "Field Trip",
-                  topLeftBadge: "Featured",
-                  topRightBadge: "+50XP",
-                  onTap: () => print("Clicked Sparrows"),
-                ),
-                ChildCard(
-                  title: "Crows",
-                  subtitle: "15 Questions",
-                  image: "https://picsum.photos/seed/bird/200/300",
-                  parentPill: "Field Trip",
-                  topLeftBadge: "Featured",
-                  topRightBadge: "+50XP",
-                  onTap: () => print("Clicked Sparrows"),
-                ),
-                ChildCard(
-                  title: "Hawks",
-                  subtitle: "Migration Specialist",
-                  image: "https://picsum.photos/seed/bird/200/300",
-                  parentPill: "Medium",
-                  isLocked: true,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-
-            // 3. QUIZZES SECTION
-            WidSection(
-              title: "Quizzes",
-              defaultFilter: "Easy",
-              cardHeight: 200,
-              cardWidth: 150,
-              pills: [
-                {'label': 'Easy', 'isLocked': false},
-                {'label': 'Medium', 'isLocked': false},
-              ],
-              cardData: [
-                ChildCard(
-                  title: "Sparrows",
-                  subtitle: "5 Questions",
-                  image: "https://picsum.photos/seed/bird/200/300",
-                  parentPill: "Easy",
-                  onTap: () => print("Clicked Sparrows"),
-                ),
-                ChildCard(
-                  title: "Hawks",
-                  subtitle: "Locked",
-                  image: "https://picsum.photos/seed/bird/200/300",
-                  parentPill: "Medium",
-                  isLocked: true,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 40),
+            // // 2. QUESTS SECTION
+            // AppSection(
+            //   title: "Quests",
+            //   defaultFilter: "Balcony Birding",
+            //   cardHeight: 200,
+            //   cardWidth: 200,
+            //   pills: [
+            //     {'label': 'Balcony Birding', 'isLocked': false},
+            //     {'label': 'Field Trip', 'isLocked': false},
+            //     {'label': 'Migration Specialist', 'isLocked': true},
+            //   ],
+            //   cardData: [
+            //     ChildCard(
+            //       title: "Sparrows",
+            //       subtitle: "5 Questions",
+            //       image: "https://picsum.photos/seed/bird/200/300",
+            //       parentPill: "Balcony Birding",
+            //       onTap: () => print("Clicked Sparrows"),
+            //     ),
+            //     ChildCard(
+            //       title: "Crows",
+            //       subtitle: "15 Questions",
+            //       image: "https://picsum.photos/seed/bird/200/300",
+            //       parentPill: "Balcony Birding",
+            //       topLeftBadge: "Featured",
+            //       topRightBadge: "+50XP",
+            //       onTap: () => print("Clicked Sparrows"),
+            //     ),
+            //     ChildCard(
+            //       title: "Crows",
+            //       subtitle: "15 Questions",
+            //       image: "https://picsum.photos/seed/bird/200/300",
+            //       parentPill: "Field Trip",
+            //       topLeftBadge: "Featured",
+            //       topRightBadge: "+50XP",
+            //       onTap: () => print("Clicked Sparrows"),
+            //     ),
+            //     ChildCard(
+            //       title: "Crows",
+            //       subtitle: "15 Questions",
+            //       image: "https://picsum.photos/seed/bird/200/300",
+            //       parentPill: "Field Trip",
+            //       topLeftBadge: "Featured",
+            //       topRightBadge: "+50XP",
+            //       onTap: () => print("Clicked Sparrows"),
+            //     ),
+            //     ChildCard(
+            //       title: "Hawks",
+            //       subtitle: "Migration Specialist",
+            //       image: "https://picsum.photos/seed/bird/200/300",
+            //       parentPill: "Medium",
+            //       isLocked: true,
+            //     ),
+            //   ],
+            // ),
+            //
+            // const SizedBox(height: 30),
+            //
+            // // 3. QUIZZES SECTION
+            // AppSection(
+            //   title: "Quizzes",
+            //   defaultFilter: "Easy",
+            //   cardHeight: 200,
+            //   cardWidth: 150,
+            //   pills: [
+            //     {'label': 'Easy', 'isLocked': false},
+            //     {'label': 'Medium', 'isLocked': false},
+            //   ],
+            //   cardData: [
+            //     ChildCard(
+            //       title: "Sparrows",
+            //       subtitle: "5 Questions",
+            //       image: "https://picsum.photos/seed/bird/200/300",
+            //       parentPill: "Easy",
+            //       onTap: () => print("Clicked Sparrows"),
+            //     ),
+            //     ChildCard(
+            //       title: "Hawks",
+            //       subtitle: "Locked",
+            //       image: "https://picsum.photos/seed/bird/200/300",
+            //       parentPill: "Medium",
+            //       isLocked: true,
+            //     ),
+            //   ],
+            // ),
           ],
         ),
       ),
     );
   }
-
-  // --- UI BUILDER METHODS ---
-
 }

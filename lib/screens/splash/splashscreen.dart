@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-// Import your service to initialize it
-import 'package:pankh/constants/designtokens.dart';
-import 'package:pankh/widgets/wid_uihelper.dart';
+// Design System
+import 'package:pankh/constants/appDesignSystem.dart';
+
+// Services
 import '../../constants/designSystemTester.dart';
 import '../../models/mod_bird.dart';
 import '../../services/ser_bird.dart';
@@ -12,19 +14,17 @@ import '../../services/ser_thirdpartydata.dart';
 import '../../services/ser_user.dart';
 import '../../services/ser_syncfirebasehive.dart';
 import '../homescreen/homescreen.dart';
-import '../quizscreen/quiz_sizeMatters.dart';
-
-
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key}); // Use super parameters
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _rotationController;
+  // Using 'late final' for better memory management of the controller
+  late final AnimationController _rotationController;
 
   @override
   void initState() {
@@ -34,48 +34,33 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         vsync: this
     )..repeat();
 
-    // Start initialization logic
     _initializeApp();
   }
 
-  /// Initialize all required services and data before moving to Home
+  /// Initialize all required services and data
   Future<void> _initializeApp() async {
-    final stopwatch = Stopwatch()..start(); // Start a stopwatch to ensure we show the splash for at least a minimum time (e.g. 1.5s) for branding, but don't exceed the actual time needed for data loading.
+    final stopwatch = Stopwatch()..start();
     List<ModBird> initialBirds = [];
 
-
     try {
-      ///////////////////
-      // 1. CHECK IF USER HAS A UID, IF NOT, GIVE
-      ///////////////////
+      // 1. AUTH LOGIC
       final auth = FirebaseAuth.instance;
       if (auth.currentUser == null) {
         await auth.signInAnonymously();
-        debugPrint("Logged in silently as Guest");
-      } else {
-        debugPrint("User already logged in: ${auth.currentUser!.uid}");
       }
       await SerUser.checkUserExists();
       SerUser.startListening();
 
-      ////////////////////
-      // --- 2. SYNC FIREBASE TO HIVE - check the version first; it's very fast if no update is needed---
-      ///////////////////
+      // 2. DATA SYNC
       await SerSyncFirebaseHive().syncBirds();
 
-
-      ////////////////////
-      // --- 3. CAROUSEL BIRDS - GET ANY 10 first from Hive, ideally wait for eBird nearby data and fetch those from Hive ---
-      ///////////////////
+      // 3. CAROUSEL BIRDS
       initialBirds = SerBird.getBirds(limitRows: 10);
-      if (initialBirds.isEmpty) {
-        // If still empty, the sync definitely failed or the box isn't being read correctly.
-        debugPrint("⚠️ Warning: initialBirds is still empty after sync!");
-      }
-      // Try to refine with eBird Nearby Data (with a timeout)
+
       try {
-        final nearbyBirds = await ThirdPartyDataService.ebirdNearbyBirds().timeout(const Duration(seconds: 2));
-        debugPrint("Nearby birds from ebird: $nearbyBirds");
+        // Performance: Added a timeout to prevent infinite splash hang on poor network
+        final nearbyBirds = await ThirdPartyDataService.ebirdNearbyBirds()
+            .timeout(AppDurations.durationXSlow);
 
         if (nearbyBirds != null && nearbyBirds.isNotEmpty) {
           initialBirds = nearbyBirds;
@@ -84,27 +69,25 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         debugPrint("Using default birds (eBird timed out/failed)");
       }
 
-      ////////////////////
-      // --- 4. PRE_CACHE BIRDS - only what is needed for the carousel ---
-      ///////////////////
+      // 4. PRE_CACHE BIRDS - Optimized: Uses the splash duration to warm up memory
       if (mounted) {
         for (var bird in initialBirds) {
           precacheImage(NetworkImage(bird.featuredImage.imageURL), context);
         }
       }
-      // end get carousel birds
 
     } catch (e) {
       debugPrint("❌ Initialization error: $e");
     } finally {
       stopwatch.stop();
       final elapsed = stopwatch.elapsedMilliseconds;
+      // Using 2500ms for consistent branding presence
       if (elapsed < 2500) await Future.delayed(Duration(milliseconds: 2500 - elapsed));
-      debugPrint("✅ Initialbirds: $initialBirds");
+
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const DesignSystemScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       }
     }
@@ -112,6 +95,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   void dispose() {
+    // Battery Performance: Ensuring ticker is killed immediately
     _rotationController.dispose();
     super.dispose();
   }
@@ -124,6 +108,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           gradient: RadialGradient(
             center: Alignment.center,
             radius: 1.0,
+            // Applying design tokens
             colors: [AppColors.colQuaternary, AppColors.colSecondary],
           ),
         ),
@@ -132,16 +117,18 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             Positioned(
               top: -250,
               left: -250,
-              // PERFORMANCE FIX: RepaintBoundary isolates the rotation animation
-              // preventing the entire stack from rebuilding every frame.
               child: RepaintBoundary(
                 child: RotationTransition(
                   turns: _rotationController,
-                  child: UiHelper.customSvg(
-                      img: "svgSwirl.svg",
-                      height: 550,
-                      width: 550,
-                      opacity: 0.4
+                  child: SvgPicture.asset(
+                    "assets/svg/svgSwirls.svg",
+                    height: 550,
+                    width: 550,
+                    // Use ColorFilter for performance and design token application
+                    colorFilter: ColorFilter.mode(
+                        AppColors.colPrimary.withAlpha(AppAlpha.alphaMedium),
+                        BlendMode.srcIn
+                    ),
                   ),
                 ),
               ),
@@ -150,48 +137,46 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             SafeArea(
               child: Column(
                 children: [
-                  const SizedBox(height: 20),
-                  UiHelper.customImage(
-                      img: "appIcon.png",
-                      width: MediaQuery.of(context).size.width * 0.2
-                  ),
-                  UiHelper.customText(
-                    text: "Pankh",
-                    color: AppColors.colWhite,
-                    fontSize: AppFontSizes.fontSizeLogo,
-                    fontFamily: AppTypography.fontLogo,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  UiHelper.customText(
-                      text: "Birding | Quizzing | Community",
+                  const SizedBox(height: AppSizes.sizeXLarge),
+                  const SizedBox(height: AppSizes.sizeXLarge),
+                  const SizedBox(height: AppSizes.sizeLarge),
+                  // Image.asset(
+                  //     "assets/images/appIcon.png",
+                  //     width: MediaQuery.of(context).size.width * 0.2
+                  // ),
+                  Text(
+                    "Pankh",
+                    style: AppTypography.logo.copyWith(
                       color: AppColors.colWhite,
-                      fontSize: AppFontSizes.fontSizeTitle,
-                      fontFamily: AppTypography.fontSubtitle,
-                      fontWeight: FontWeight.bold
+                    ),
                   ),
-                  const SizedBox(height: 30),
+                  Text(
+                    "Birding | Quizzing | Community",
+                    style: AppTypography.subtitle2.copyWith(
+                      color: AppColors.colWhite,
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.sizeXLarge),
 
                   Center(
-                    child: UiHelper.customImage(
-                        img: "SplashMiddleGraphics.png",
+                    child: Image.asset(
+                        "assets/images/SplashMiddleGraphics.webp",
                         height: 379,
                         width: MediaQuery.of(context).size.width * 0.9
                     ),
                   ),
 
                   const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      UiHelper.customText(
-                        text: "Made with ❤️ for Bharat",
+                  // "Made in Bharat" section with design tokens
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSizes.sizeMedium),
+                    child: Text(
+                      "Made with ❤️ for Bharat",
+                      style: AppTypography.body.copyWith(
                         color: AppColors.colWhite,
-                        fontSize: AppFontSizes.fontSizeTitle,
-                        fontFamily: AppTypography.fontSubtitle,
                       ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),

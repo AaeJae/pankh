@@ -1,19 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/designtokens.dart';
-import 'package:pankh/constants/component_button.dart';
-
-import 'component_autocomplete.dart';
-import 'component_dialog.dart';
-import 'component_modalBottomSheet.dart';
-import 'component_progress.dart';
-import 'component_skeleton.dart';
-import 'component_slider.dart';
-import 'component_tabContainer.dart'; // Ensure this matches your file path
+import 'package:pankh/constants/appDesignSystem.dart';
+import 'package:pankh/constants/component_appCarousel.dart';
 
 class DesignSystemScreen extends StatelessWidget {
   const DesignSystemScreen({super.key});
 
-
+  final AppCard cardLocked = const AppCard(
+    height: 180,
+    title: "Sunbird",
+    subtitle: "Cinnyris asiaticus",
+    image: "assets/images/shikra.jpg", // Replace with your asset path
+    topLeftBadge: "Common",
+    isLocked: true,
+    expandedText: "Shikra is a small sunbird. Like other sunbirds, they feed largely on nectar, although they will also take insects, especially when feeding young.",
+  );
+  final AppCard cardExpandable = const AppCard(
+    height: 180,
+    title: "Purple Sunbird",
+    subtitle: "Cinnyris asiaticus",
+    image: "assets/images/hummingBird.png", // Replace with your asset path
+    topRightBadge: "Featured",
+    topLeftBadge: "Common",
+    expandedText: "The Purple Sunbird is a small sunbird. Like other sunbirds, they feed largely on nectar, although they will also take insects, especially when feeding young.",
+  );
+  final AppCard cardBadgeExpandable = const AppCard(
+    height: 180,
+    title: "Minivet",
+    subtitle: "Mini Cinnyris asiaticus",
+    image: "assets/images/minivet.jpg", // Replace with your asset path
+    topRightBadge: "Featured",
+    expandedText: "The Minivet is a small sunbird. Like other sunbirds, they feed largely on nectar, although they will also take insects, especially when feeding young.",
+  );
+  final AppCard cardBadgeNonExpand = const AppCard(
+    height: 180,
+    title: "Sparrow",
+    subtitle: "Sparrowcus",
+    image: "assets/images/sparrow.jpg", // Replace with your asset path
+    topRightBadge: "Featured",
+  );
+  final AppCard cardText = const AppCard(
+    height: 180,
+    title: "Shikra",
+    subtitle: "Shikra asiaticus",
+  );
+  final AppCard cardPlain = const AppCard(
+    height: 180,
+  );
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,53 +57,65 @@ class DesignSystemScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.screenEdge),
+        padding: const EdgeInsets.all(AppSizes.screenEdge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _sectionTitle("Typography Scale"),
             _buildTypeScale(),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             _sectionTitle("Color Palette & Contrast"),
             _buildColorPalette(),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             _sectionTitle("Shadows & Elevation"),
             _buildShadowTest(),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             _sectionTitle("Button Gallery"),
             _buildButtonGallery(),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             _sectionTitle("Autocomplete"),
             _buildAutocompleteTest(),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             _sectionTitle("Bottom Sheet Modal"),
             _buildModalBottomSheetTest(context),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             _sectionTitle("Dialog"),
             _buildDialogTest(context),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             _sectionTitle("Progress"),
             _buildProgressTest(),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             _sectionTitle("Skeleton"),
             _buildSkeletonTest(),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             _sectionTitle("Slider"),
             _buildSliderTest(),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             _sectionTitle("TabContainer"),
-            _buildTabTest(),
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            //_buildTabTest(),
+            const SizedBox(height: AppSizes.sizeXLarge),
+
+            _sectionTitle("Carousel Magnified"),
+            _buildCarouselMagnifiedTest(),
+            const SizedBox(height: AppSizes.sizeXLarge),
+
+            _sectionTitle("Carousel Horizontal"),
+            _buildCarouselHorizontalTest(),
+            const SizedBox(height: AppSizes.sizeXLarge),
+
+            _sectionTitle("Carousel paginated"),
+            _buildCarouselPaginatedTest(),
+            const SizedBox(height: AppSizes.sizeXLarge),
           ],
         ),
       ),
@@ -80,7 +124,7 @@ class DesignSystemScreen extends StatelessWidget {
 
   Widget _sectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.spacingMedium),
+      padding: const EdgeInsets.only(bottom: AppSizes.sizeSmall),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -96,19 +140,19 @@ class DesignSystemScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("Dwarf Kingfisher T1", style: AppTypography.title1),
-        const SizedBox(height: AppSpacing.spacingSmall),
+        const SizedBox(height: AppSizes.sizeXSmall),
         Text("Red Whiskered Bulbul T2", style: AppTypography.title2),
-        const SizedBox(height: AppSpacing.spacingSmall),
+        const SizedBox(height: AppSizes.sizeXSmall),
         Text("Habitats and Diet Subtitle1", style: AppTypography.subtitle1),
-        const SizedBox(height: AppSpacing.spacingSmall),
+        const SizedBox(height: AppSizes.sizeXSmall),
         Text("Scientific Classification Sub2", style: AppTypography.subtitle2),
-        const SizedBox(height: AppSpacing.spacingSmall),
+        const SizedBox(height: AppSizes.sizeXSmall),
         Text("Body Regular: Highlighting bird species in their natural habitat.", style: AppTypography.body),
-        const SizedBox(height: AppSpacing.spacingSmall),
+        const SizedBox(height: AppSizes.sizeXSmall),
         Text("Body Bold: Essential for highlighting key details.", style: AppTypography.bodyBold),
-        const SizedBox(height: AppSpacing.spacingSmall),
+        const SizedBox(height: AppSizes.sizeXSmall),
         Text("Caption: Source Wikipedia 2026", style: AppTypography.caption),
-        const SizedBox(height: AppSpacing.spacingSmall),
+        const SizedBox(height: AppSizes.sizeXSmall),
         Text("www.pankh-birds.com", style: AppTypography.link),
       ],
     );
@@ -116,8 +160,8 @@ class DesignSystemScreen extends StatelessWidget {
 
   Widget _buildColorPalette() {
     return Wrap(
-      spacing: AppSpacing.spacingMedium,
-      runSpacing: AppSpacing.spacingMedium,
+      spacing: AppSizes.sizeSmall,
+      runSpacing: AppSizes.sizeSmall,
       children: [
         _colorSquare(AppColors.colPrimary, AppColors.colOnPrimary, "Primary"),
         _colorSquare(AppColors.colSecondary, AppColors.colOnSecondary, "Secondary"),
@@ -138,7 +182,7 @@ class DesignSystemScreen extends StatelessWidget {
           height: 80,
           decoration: BoxDecoration(
             color: bgColor,
-            borderRadius: BorderRadius.circular(AppRadii.radiusSmall),
+            borderRadius: BorderRadius.circular(AppSizes.sizeXSmall),
             boxShadow: AppShadows.shadowSmall,
           ),
           child: Center(
@@ -168,7 +212,7 @@ class DesignSystemScreen extends StatelessWidget {
       height: 60,
       decoration: BoxDecoration(
         color: AppColors.colWhite,
-        borderRadius: BorderRadius.circular(AppRadii.radiusSmall),
+        borderRadius: BorderRadius.circular(AppSizes.sizeXSmall),
         boxShadow: shadow,
       ),
       child: Center(child: Text(label, style: AppTypography.caption)),
@@ -316,73 +360,78 @@ class DesignSystemScreen extends StatelessWidget {
       ],
     );
   }
+
   Widget _buildDialogTest(BuildContext context) {
-    return AppButton(
-      label: "Show Alert Dialog",
-      onPressed: () {
-        AppDialog.show(
-          context,
-          title: "Verify Identity",
-          isClosable: true,
-          // Subtitle as a widget for rich content
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Please login to save your bird sighting. By continuing, you agree to our Please login to save your bird sighting. By continuing, you agree to ourPlease login to save your bird sighting. By continuing, you agree to ourPlease login to save your bird sighting. By continuing, you agree to ourPlease login to save your bird sighting. By continuing, you agree to our",
-                style: AppTypography.body,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Dialog", style: AppTypography.subtitle1),
+        const SizedBox(height: AppSizes.sizeSmall),
+
+        // Trigger button for the Dialog
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.colPrimary,
+              foregroundColor: AppColors.colOnPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.sizeSmall),
               ),
-              InkWell(
-                onTap: () {},
-                child: Text("Privacy Policy",
-                    style: AppTypography.link.copyWith(color: AppColors.colPrimary)
+            ),
+            onPressed: () {
+              AppDialog.show(
+                context,
+                title: "Confirm Action",
+                isClosable: true,
+                subtitle: Text(
+                  "Are you sure you want to proceed with this bird sighting entry? This action cannot be undone.",
+                  style: AppTypography.body,
                 ),
-              ),
-              const SizedBox(height: AppSpacing.spacingMedium),
-              const Icon(Icons.security, color: AppColors.colSecondary)
-            ],
+                items: [
+                  // Using your AppButton component (assuming standard design)
+                  AppButton(
+                    label: "Cancel",
+                    variant: AppButtonVariant.flat, // Or outline based on your system
+                  ),
+                  AppButton(
+                    label: "Confirm",
+                    variant: AppButtonVariant.solid,
+                  ),
+                ],
+              );
+            },
+            child: Text("Show AppDialog", style: AppTypography.controls),
           ),
-          items: [
-            AppButton(
-              label: "Next time",
-              variant: AppButtonVariant.flat,
-              size: AppButtonSize.small,
-              onPressed: () => Navigator.pop(context),
-            ),
-            AppButton(
-              label: "Login",
-              size: AppButtonSize.small,
-              onPressed: () => print("Logging in..."),
-            ),
-          ],
-        );
-      },
+        ),
+      ],
     );
   }
+
   Widget _buildProgressTest() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. Matches your image exactly (Monthly expenses)
+        //1. Matches your image exactly (Monthly expenses)
         const AppProgress(
           value: 0.4,
           labelLeft: "40% attempted",
           labelRight: "3/10 correct",
         ),
-        const SizedBox(height: AppSpacing.spacingLarge),
+        const SizedBox(height: AppSizes.sizeMedium),
 
         const AppProgress(
           value: 0.75,
           color: AppColors.colPrimary,
         ),
-        const SizedBox(height: AppSpacing.spacingLarge),
+        const SizedBox(height: AppSizes.sizeMedium),
 
         // 3. Thick variant for "Health" or "Stats"
         const AppProgress(
           value: 0.9,
           labelLeft: "Sighting Accuracy",
           color: AppColors.colSuccess,
-          thickness: AppSpacing.spacingSmall,
+          thickness: AppSizes.sizeXSmall,
         ),
       ],
     );
@@ -395,15 +444,15 @@ class DesignSystemScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start, // Align to top
           children: [
             AppSkeleton.circle(size: 48),
-            const SizedBox(width: AppSpacing.spacingMedium),
+            const SizedBox(width: AppSizes.sizeSmall),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const AppSkeleton(width: 150, height: 16), // Title
-                  const SizedBox(height: AppSpacing.spacingXSmall),
+                  const SizedBox(height: AppSizes.sizeXXSmall),
                   const AppSkeleton(width: double.infinity, height: 12), // Subtitle
-                  const SizedBox(height: AppSpacing.spacingXSmall),
+                  const SizedBox(height: AppSizes.sizeXXSmall),
                   const AppSkeleton(width: 100, height: 12), // Third line
                 ],
               ),
@@ -411,13 +460,13 @@ class DesignSystemScreen extends StatelessWidget {
           ],
         ),
 
-        const SizedBox(height: AppSpacing.spacingLarge),
+        const SizedBox(height: AppSizes.sizeMedium),
 
         // Simulating a Card Skeleton
         const AppSkeleton(
           width: double.infinity,
           height: 150,
-          borderRadius: AppRadii.radiusMedium,
+          borderRadius: AppSizes.sizeLarge,
         ),
       ],
     );
@@ -444,7 +493,7 @@ class DesignSystemScreen extends StatelessWidget {
               },
             ),
 
-            const SizedBox(height: AppSpacing.spacingXXLarge),
+            const SizedBox(height: AppSizes.sizeXLarge),
 
             // Range Slider Snapping to Years
             AppRangeSlider(
@@ -462,43 +511,70 @@ class DesignSystemScreen extends StatelessWidget {
       },
     );
   }
-  Widget _buildTabTest() {
-    return AppTabs(
-      items: [
-        AppTabItem(
-          label: "Photos",
-          icon: Icons.image_outlined,
-          content: const Center(child: Text("Your Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird GalleryYour Bird FINALLY", style: AppTypography.body)),
-        ),
-        AppTabItem(
-          label: "Music",
-          content: const Center(child: Text("Bird Songs and Calls", style: AppTypography.body)),
-        ),
-        AppTabItem(
-          label: "Draw",
-          content: const Center(child: Text("Bird Songs and Calls", style: AppTypography.body)),
-        ),
-        AppTabItem(
-          label: "Bird",
-          content: const Center(child: Text("Bird Songs and Calls", style: AppTypography.body)),
-        ),
-        AppTabItem(
-          label: "Test",
-          content: const Center(child: Text("Bird Songs and Calls", style: AppTypography.body)),
-        ),
-        AppTabItem(
-          label: "Videos",
-          isLocked: true, // Demonstrating the locked state
-          content: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.lock, color: AppColors.colDisabled, size: 40),
-              const SizedBox(height: 8),
-              Text("Pro Membership Required", style: AppTypography.subtitle2.copyWith(color: AppColors.colDisabled)),
-            ],
-          ),
-        ),
-      ],
+
+  Widget _buildCarouselMagnifiedTest() {
+    final List<AppCard> birdCards = [
+      cardLocked,
+      cardExpandable,
+      cardBadgeExpandable,
+      cardBadgeNonExpand,
+      cardText,
+      cardPlain,
+      cardBadgeExpandable,
+      cardBadgeNonExpand,
+      cardText,
+      cardPlain,
+    ];
+    return AppCarousel(
+      height: 160,
+      cardWidth: 300,
+      cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaLow),
+      viewportFraction: 0.75,
+      enlargeCenterPage: true,
+      autoplay: true,
+      scrollType: AppScrollType.infinite,
+      cards: birdCards,
     );
   }
+
+  Widget _buildCarouselHorizontalTest() {
+    final List<AppCard> birdCards = [
+      cardLocked,
+      cardExpandable,
+      cardBadgeNonExpand,
+      cardText,
+      cardPlain,
+      cardBadgeExpandable,
+      cardBadgeNonExpand,
+      cardText,
+      cardPlain,
+    ];
+    return AppCarousel(
+      height: 150,
+      cardWidth: 300,
+      cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaMedium),
+      cards: birdCards,
+    );
+  }
+  Widget _buildCarouselPaginatedTest() {
+    final List<AppCard> birdCards = [
+      cardLocked,
+      cardExpandable,
+      cardBadgeNonExpand,
+      cardText,
+      cardPlain,
+      cardBadgeExpandable,
+      cardBadgeNonExpand,
+      cardText,
+      cardPlain,
+    ];
+    return AppCarousel(
+      height: 80,
+      isPaginated: true,
+      cardWidth: 300,
+      cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaMedium),
+      cards: birdCards,
+    );
+  }
+
 }

@@ -1,19 +1,15 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/designtokens.dart';
-import '../../../widgets/wid_uihelper.dart';
+import 'package:pankh/constants/appDesignSystem.dart';
+
 import '../../../widgets/wid_header.dart';
-import '../../../widgets/wid_footermenu.dart';
+import '../../../widgets/wid_botmenu.dart';
 import '../../models/mod_bird.dart';
 import '../../services/ser_thirdpartydata.dart';
+import '../../widgets/widDialog.dart';
 import '../../widgets/wid_locationpicker.dart';
-import '../../widgets/wid_pullMenu.dart';
-import '../../widgets/wid_quizhelper.dart';
-import '../../widgets/wid_section.dart';
-import '../profilescreen/profilescreen.dart';
-import '../quizscreen/quizscreen.dart';
 import '../buyscreen/buyscreen.dart';
 import '../explorescreen/explorescreen.dart';
+import '../profilescreen/profilescreen.dart';
 import '../groupscreen/groupscreen.dart';
 import '../../services/ser_bird.dart';
 
@@ -27,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
+  int? _expandedBirdIndex;
   List<ModBird> _currentBirds = [];
   String _currentSelectedCity = "Thane";
 
@@ -35,19 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _currentBirds = widget.carouselBirds ?? SerBird.getBirds(limitRows: 10);
   }
+
   Future<void> startBlitzQuiz() async {
-    final String? difficulty = await WidQuizHelper.showDifficultyPicker(context);
-    if (difficulty != null && mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => QuizScreen(
-            difficulty: difficulty,
-            onQuit: () => Navigator.pop(context),
-          ),
-        ),
-      );
-    }
   }
   @override
   Widget build(BuildContext context) {
@@ -57,16 +43,19 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           // 1. PAGE CONTENT (Full Screen)
-          Positioned.fill(
-            child: _getSelectedPage(),
-          ),
+          Positioned.fill(child: _getSelectedPage()),
 
-          // 2. THE STICKY BAR
-          Positioned(left: 0, right: 0, bottom:0,
+          // 2. BOTTOM MENU
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
             child: Column(
               children: [
                 SizedBox(
-                  child: WidBotMenu(selectedIndex: selectedIndex, onItemTapped: _onItemTapped,
+                  child: WidBotMenu(
+                    selectedIndex: selectedIndex,
+                    onItemTapped: _onItemTapped,
                   ),
                 ),
                 ColoredBox(
@@ -75,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: MediaQuery.of(context).padding.bottom,
                     width: double.infinity,
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -87,14 +76,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onItemTapped(int index) {
     setState(() => selectedIndex = index);
   }
+
   Widget _getSelectedPage() {
     switch (selectedIndex) {
-      case 0: return _buildHomeContent();
-      case 1: return const ExploreScreen();
-      case 2: return const GroupScreen();
-      case 3: return const BuyScreen();
-      case 4: return const ProfileScreen();
-      default: return _buildHomeContent();
+      case 0:
+        return _buildHomeContent();
+      case 1:
+        return const ExploreScreen();
+      case 2:
+        return const GroupScreen();
+      case 3:
+        return const BuyScreen();
+      case 4:
+        return const ProfileScreen();
+      default:
+        return _buildHomeContent();
     }
   }
 
@@ -104,170 +100,177 @@ class _HomeScreenState extends State<HomeScreen> {
         Positioned.fill(
           child: Column(
             children: [
+
+              // 1. Header
               const WidHeader(),
+
+              // 2. BODY
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: 180), // Padding for pill + pull-up peek
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const SizedBox(height: AppSizes.sizeSmall),
 
-                      _LocationTag(
-                        locationName: _currentSelectedCity,
+                      //////////// 1. LOCATION PICKER
+                      InkWell(
                         onTap: () {
-                          WidLocationPicker.showLocationBottomModal(context, (name, lat, lng) async {
-                            setState(() { _currentSelectedCity = name; });
+                          WidLocationPicker.showLocationBottomModal(context, (name,lat,lng,)
+                          async {setState(() {_currentSelectedCity = name;});
                             try {
-                              final newBirds = await ThirdPartyDataService.ebirdNearbyBirds(lati: lat, lngi: lng);
-                              setState(() { _currentBirds = newBirds; });
+                              final newBirds =await ThirdPartyDataService.ebirdNearbyBirds(lati: lat,lngi: lng,);
+                              setState(() {_currentBirds = newBirds;});
                             } catch (e) {}
                           });
                         },
+                        child: AppSectionTitle(title: "NEAR YOU: $_currentSelectedCity",showViewAll: true,),
                       ),
 
-                      WidSection(
-                        isMagnified: true,
-                        enlargeCenterPage: true,
-                        autoPlay: true,
-                        viewportFraction: 0.8,
-                        cardHeight: 190,
+                      ///////////// 2. BIRD CAROUSEL
+                      AppCarousel(
+                        height: 200,
                         cardWidth: 350,
-                        cardData: _mapBirdsToCards(_currentBirds),
+                        cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaLow),
+                        viewportFraction: 0.75,
+                        enlargeCenterPage: true,
+                        autoplay: true,
+                        scrollType: AppScrollType.infinite,
+                        cards: _mapBirdsToCards(_currentBirds),
                       ),
-                      const SizedBox(height: 30),
-                      WidSection(
+                      const SizedBox(height: AppSizes.sizeSmall),
+
+                      /////////////// 3. QUIZZES, QUESTS, EVENTS
+                      AppSectionTitle(
                         title: "WHAT'S CHIRPING",
-                        defaultFilter: "EVENTS",
-                        cardHeight: 190,
-                        cardWidth: 160,
-                        pills: [
-                          {'label': "EVENTS", 'isLocked': false},
-                          {'label': "QUIZZES", 'isLocked': false},
-                          {'label': "QUESTS", 'isLocked': false},
-                        ],
-                        cardData: [
-                          ChildCard(title: "Bird Week 2026", subtitle: "Help local count", image: "https://picsum.photos/seed/bird1/200/300", parentPill: "EVENTS", onTap: () {}),
-                          ChildCard(title: "Bird Week 2026", subtitle: "Help local count", image: "https://picsum.photos/seed/bird5/200/300", parentPill: "EVENTS", onTap: () {}),
-                          ChildCard(title: "Bird Week 2026", subtitle: "Help local count", image: "https://picsum.photos/seed/bird3/200/300", parentPill: "EVENTS", onTap: () {}),
-                          ChildCard(title: "Bird Week 2026", subtitle: "Help local count", image: "https://picsum.photos/seed/bird4/200/300", parentPill: "EVENTS", onTap: () {}),
+                        subtitle: "Popular content this week",
+                        showViewAllLabel: true,
+                        showViewAll: true,
+                      ),
 
-                          ChildCard(title: "Birdemon!", subtitle: "15 Questions", image: "https://picsum.photos/seed/bird3/200/300", parentPill: "QUIZZES", topRightBadge: "+50XP", onTap: () {}),
-                          ChildCard(title: "Birdemon!", subtitle: "15 Questions", image: "https://picsum.photos/seed/bird4/200/300", parentPill: "QUIZZES", topRightBadge: "+50XP", onTap: () {}),
-                          ChildCard(title: "Birdemon!", subtitle: "15 Questions", image: "https://picsum.photos/seed/bird5/200/300", parentPill: "QUIZZES", topRightBadge: "+50XP", onTap: () {}),
-                          ChildCard(title: "Birdemon!", subtitle: "15 Questions", image: "https://picsum.photos/seed/bird8/200/300", parentPill: "QUESTS", topRightBadge: "+50XP", onTap: () {}),
+                      AppTabContainer(
+                        isScrollable: false,
+                        height: 230,
+                        tabs: [
+                          AppTab(label: "Quizzes",
+                            content: [
+                              AppCarousel(
+                                height: 200,
+                                cardWidth: 170,
+                                cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaMedium),
+                                cards: [
+                                  AppCard(title: "Sound Quiz", subtitle:"Do you have a good ear?",topLeftBadge:"+50XP", image: "https://picsum.photos/seed/bird9/200/300", ),
+                                  AppCard(title: "Image Quiz", subtitle:"Pehchan kaun!",topLeftBadge:"+150XP", image: "https://picsum.photos/seed/bird2/200/300", ),
+                                  AppCard(title: "Meme Quiz", subtitle:"Kispar hai ye meme?",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird3/200/300", ),
+                                ],
+                              ),
+                            ],                            
+                          ),
+                          AppTab(label: "Quests",
+                            content: [
+                              AppCarousel(
+                                height: 200,
+                                cardWidth: 150,
+                                cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaMedium),
+                                cards: [
+                                  AppCard(title: "Beginners Quest", subtitle:"Get started with Birding",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird5/200/300", ),
+                                  AppCard(title: "Hobbyist Quest", subtitle:"Level up",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird8/200/300", ),
+                                  AppCard(title: "Expert Quest", subtitle:"God of birding",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird9/200/300", ),
+
+                                ],
+                              )
+                            ],
+                          ),
+                          AppTab(label: "Events",
+                            isLocked: true,
+                            content: [
+                              AppCarousel(
+                                height: 200,
+                                cardWidth: 150,
+                                cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaMedium),
+                                cards: [
+                                  AppCard(isLocked:true, title: "SGNP Events", subtitle:"Events at your local hotspot",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird7/200/300", ),
+                                  AppCard(title: "Bird Week 2026", subtitle:"Participate!",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird1/200/300", ),
+                                  AppCard(title: "Global Birdathon", subtitle:"Help the community",topLeftBadge:"+250XP" , image: "https://picsum.photos/seed/bird2/200/300",),
+
+                                ],
+                              )
+                            ],
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            UiHelper.customText(text: "WEEKLY ACTIVITIES", fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.colPrimary),
-                            const SizedBox(height: 10),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  flex: 7,
-                                  child: Container(
-                                    height: 90,
-                                    padding: const EdgeInsets.fromLTRB(20,5, 20, 5),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.colPrimary.withOpacity(0.07),
-                                      //border: Border.all(color: AppColors.colPrimary.withOpacity(0.2), width: 1.5),
-                                      borderRadius: BorderRadius.circular(24),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        UiHelper.customText(text: "Breakfast Cafe", fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.colPrimary),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            const SizedBox(width: 6),
-                                            UiHelper.customText(text: "Breakfast Cafe", fontSize: 13, fontWeight: FontWeight.bold),
 
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                      /////////////// 4. WEEKLY ACTIVITIES
+                      AppSectionTitle(
+                        title: "WEEKLY ACTIVITIES",
+                        showViewAllLabel: true,
+                        showViewAll: true,
+                      ),
 
-                                const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 80,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(horizontal: AppSizes.screenEdge),
+                              itemCount: 2,
+                              separatorBuilder: (_, __) => const SizedBox(width: AppSizes.sizeSmall),
+                              itemBuilder: (context, index) {
+                                final double cardWidth = MediaQuery.of(context).size.width - (AppSizes.screenEdge * 2);
 
-                                Expanded(
-                                  flex: 3,
-                                  child: GestureDetector(
-                                    onTap: startBlitzQuiz, // Use the callback passed into your widget
-                                    child: Container(
-                                      height: 90,
-                                      padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.colPrimary,
-                                        borderRadius: BorderRadius.circular(24),
-                                        // Adding a slight shadow makes the tappable area more obvious
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: AppColors.colPrimary.withOpacity(0.3),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(Icons.bolt, color: Colors.amber, size: 20),
-                                          UiHelper.customText(
-                                              text: "Play \n BLITZ QUIZ",
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                              textAlign: TextAlign.center
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-
-                              ],
+                                if (index == 0) {
+                                  return AppCard(
+                                    title: "Play Blitz Quiz ‍⚡",
+                                    subtitle: "Test your speed!",
+                                    height: 80,
+                                    width: cardWidth,
+                                    image: "assets/images/cardBg1.webp",
+                                    overlayColor: AppColors.colPrimary.withAlpha(AppAlpha.alphaHigh),
+                                    onTap: (){WidDialog.showDifficultyPicker(context);}
+                                  );
+                                } else {
+                                  return AppCard(
+                                    title: "Weekly Streak",
+                                    subtitle: "5 Days Running!",
+                                    height: 80,
+                                    width: cardWidth,
+                                    isLocked: true,
+                                    onTap: () {},
+                                  );
+                                }
+                              },
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: EdgeInsets.all(16),
-                        child: Column(
+                      const SizedBox(height: AppSizes.sizeSmall),
 
+                      /////////// 5. FOOTER GREETING
+                      Container(
+                        padding: EdgeInsets.all(AppSizes.screenEdge),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height:70),
-
-                            // Text("Happie Birrrding", style: TextStyle(fontSize: 72, fontWeight: FontWeight.bold, color: Colors.grey, height: 1)),
-                            // Text("!", style: TextStyle(fontSize: 72, fontWeight: FontWeight.bold, color: AppColors.colOnTertiary, height: 1)),
+                            const SizedBox(height: AppSizes.sizeXLarge),
+                            const SizedBox(height: AppSizes.sizeXLarge),
                             Text.rich(
                               TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: 'Happie Birrrding',
-                                    style: TextStyle(
-                                      color: Colors.grey,
+                                    text: 'Happy \nBirrrding',
+                                    style: AppTypography.title1.copyWith(
+                                      color: AppColors.colOnDisabled,
                                       fontWeight: FontWeight.bold,
-                                      height:1,
+                                      height: 0.9,
                                       fontSize: 72,
                                     ),
                                   ),
                                   TextSpan(
                                     text: "!", // Your dynamic user name
-                                    style: TextStyle(
-                                      color: AppColors.colOnTertiary,
+                                    style: AppTypography.title1.copyWith(
+                                      color: AppColors.colPrimary,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 72,
                                     ),
@@ -275,12 +278,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                             ),
-                            const SizedBox(height:5),
-                            Text("Made with ♥️ for Bharat", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.colPrimary)),
-                            const SizedBox(height:50),
-
+                            const SizedBox(height: AppSizes.sizeXSmall),
+                            Text(
+                              "Made with ♥️ for Bharat",
+                              style: AppTypography.subtitle2,
+                            ),
+                            const SizedBox(height: AppSizes.sizeXLarge),
+                            const SizedBox(height: AppSizes.sizeXLarge),
+                            const SizedBox(height: AppSizes.sizeXLarge),
+                            const SizedBox(height: AppSizes.sizeXLarge),
                           ],
-
                         ),
                       ),
                     ],
@@ -308,51 +315,63 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-  List<ChildCard> _mapBirdsToCards(List<ModBird> birds) {
-    return birds.map((bird) => ChildCard(
+  List<AppCard> _mapBirdsToCards(List<ModBird> birds) {
+    return birds.map((bird) => AppCard(
       title: bird.birdName,
       subtitle: bird.hindiNames.isNotEmpty ? bird.hindiNames[0] : '',
       image: bird.featuredImage.imageURL,
-      parentPill: "Nearby",
-      onTap: () {},
+      expandedText: bird.lore, // Pass lore directly
     )).toList();
   }
-}
 
-class _LocationTag extends StatelessWidget {
-  final VoidCallback onTap;
-  final String locationName;
-  const _LocationTag({required this.onTap, required this.locationName});
+  /*Widget birdsNearbyCarousel() {
+    final List<AppCard> birdCards = _mapBirdsToCards(_currentBirds);
 
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-
-      onTap: onTap,
-      child: Padding(
-
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-
-        child: Row(
-
-          children: [
-
-            const SizedBox(height: 40),
-
-            Expanded(
-              child: Row(
-                children: [
-                  UiHelper.customText(text: "BIRDS NEARBY: ", fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.colPrimary),
-                  const Icon(Icons.location_on_rounded, color: AppColors.colPrimary, size: 20),
-                  UiHelper.customText(text: locationName, fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.colPrimary),
-                ],
-              ),
-            ),
-            const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.colPrimary),
-          ],
-        ),
+    return CarouselSlider.builder(
+      itemCount: birdCards.length,
+      options: CarouselOptions(
+        // Height should match your design tokens for magnified cards
+        height: 190,
+        viewportFraction: 0.75,
+        enlargeCenterPage: true,
+        enlargeStrategy: CenterPageEnlargeStrategy.scale,
+        autoPlay: _expandedBirdIndex == null, // Pause autoplay if a card is expanded
+        autoPlayInterval: AppDurations.durationXXXSlow,
+        onPageChanged: (index, reason) {
+          // Crucial: Reset expansion state when user swipes to avoid "ghost" panels on new cards
+          if (_expandedBirdIndex != null) {
+            setState(() => _expandedBirdIndex = null);
+          }
+        },
       ),
+      itemBuilder: (context, index, realIndex) {
+        final bird = _currentBirds[index];
+        final card = birdCards[index];
+        final bool isExpanded = _expandedBirdIndex == index;
+
+        // 3. Inject expansion logic and content into the AppCard grandchild
+        return AppCard(
+          title: card.title,
+          subtitle: card.subtitle,
+          image: card.image,
+          parentPill: card.parentPill,
+          height: 200,
+          width: 320,
+          topLeftBadge: card.topLeftBadge,
+          topRightBadge: card.topRightBadge,
+          onTap: card.onTap,
+          // Expanded State logic
+          canExpand: true,
+          isExpanded: isExpanded,
+          expandedSubtitle: bird.lore, // Pulls description from your ModBird model
+          onExpandToggle: () {
+            setState(() {
+              // Toggle expansion: if already expanded, close it; otherwise, open this index
+              _expandedBirdIndex = isExpanded ? null : index;
+            });
+          },
+        );
+      },
     );
-  }
+  }*/
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/designtokens.dart';
-import 'package:pankh/widgets/wid_dialog.dart';
+import 'package:pankh/constants/appDesignSystem.dart';
 import 'package:pankh/widgets/wid_uihelper.dart';
 
 class SizeMattersScreen extends StatefulWidget {
@@ -25,41 +24,41 @@ class _SizeMattersScreenState extends State<SizeMattersScreen> {
     final double difference = (_currentScale - targetScale).abs();
     final bool isCorrect = difference <= tolerance;
 
-    if (isCorrect) {
-      setState(() => _gameEnded = true);
-      WidDialog.customDialog(
-        context,
-        "PERFECT SIZE!",
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.straighten, color: Colors.white, size: 50),
-            const SizedBox(height: 15),
-            UiHelper.customText(
-              text: "Spot on! A Bulbul is indeed about 20cm long, slightly larger than a standard smartphone.",
-              color: Colors.white,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        [DialogPill(label: "Next Level", action: "next")],
-        canClose: false,
-      );
-    } else {
-      WidDialog.customDialog(
-        context,
-        "NOT QUITE...",
-        UiHelper.customText(
-          text: _currentScale < targetScale
-              ? "A bit too small! Try making the bird a little larger."
-              : "Too big! That's more like a hawk size.",
-          color: Colors.white,
-          textAlign: TextAlign.center,
-        ),
-        [DialogPill(label: "Adjust Size", action: "retry")],
-        canClose: true,
-      );
-    }
+    // if (isCorrect) {
+    //   setState(() => _gameEnded = true);
+    //   WidDialog.customDialog(
+    //     context,
+    //     "PERFECT SIZE!",
+    //     Column(
+    //       mainAxisSize: MainAxisSize.min,
+    //       children: [
+    //         const Icon(Icons.straighten, color: Colors.white, size: 50),
+    //         const SizedBox(height: 15),
+    //         UiHelper.customText(
+    //           text: "Spot on! A Bulbul is indeed about 20cm long, slightly larger than a standard smartphone.",
+    //           color: Colors.white,
+    //           textAlign: TextAlign.center,
+    //         ),
+    //       ],
+    //     ),
+    //     [DialogPill(label: "Next Level", action: "next")],
+    //     canClose: false,
+    //   );
+    // } else {
+    //   WidDialog.customDialog(
+    //     context,
+    //     "NOT QUITE...",
+    //     UiHelper.customText(
+    //       text: _currentScale < targetScale
+    //           ? "A bit too small! Try making the bird a little larger."
+    //           : "Too big! That's more like a hawk size.",
+    //       color: Colors.white,
+    //       textAlign: TextAlign.center,
+    //     ),
+    //     [DialogPill(label: "Adjust Size", action: "retry")],
+    //     canClose: true,
+    //   );
+    // }
   }
 
   @override
