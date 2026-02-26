@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "642831902266",
+    "project_id": "pankh-app",
+    "storage_bucket": "pankh-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642831902266:android:2b8fcff1974a715761f703",
+        "android_client_info": {
+          "package_name": "com.aaejae.pankh"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcxoW-NrCPvMzhSq27aNK2QYHKKSH0HKA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
