@@ -1,9 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:pankh/constants/appDesignSystem.dart';
+import 'package:pankh/models/mod_quiz.dart';
 
 import '../../../widgets/wid_header.dart';
 import '../../../widgets/wid_botmenu.dart';
 import '../../models/mod_bird.dart';
+import '../../services/ser_quiz.dart';
 import '../../services/ser_thirdpartydata.dart';
 import '../../widgets/widDialog.dart';
 import '../../widgets/wid_locationpicker.dart';
@@ -15,7 +19,7 @@ import '../../services/ser_bird.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<ModBird>? carouselBirds;
-  const HomeScreen({super.key, this.carouselBirds});
+  const HomeScreen(this.carouselBirds, {super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -23,18 +27,39 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
-  int? _expandedBirdIndex;
   List<ModBird> _currentBirds = [];
+  List<ModQuiz>? _quizzesList = [];
+  List<AppCard>? _quizAppCards = [];
   String _currentSelectedCity = "Thane";
 
   @override
   void initState() {
     super.initState();
     _currentBirds = widget.carouselBirds ?? SerBird.getBirds(limitRows: 10);
+    _init();
+  }
+  void _init() async { // send to different screens
+    _quizzesList = await SerQuiz.getQuizzes();
+    if (_quizzesList != null && _quizzesList!.isNotEmpty) {
+      _quizAppCards = _quizzesList!.map((quiz) {
+        final titleIndex = Random().nextInt(quiz.quizNames?.length ?? 1);
+        final subtitleIndex = Random().nextInt(quiz.quizDescriptions?.length ?? 1);
+        final birdIndex = Random().nextInt(_currentBirds.isNotEmpty ? _currentBirds.length : 1);
+        debugPrint("inside _init() birdIndex: ${birdIndex}, _currentBirds[birdIndex]: ${_currentBirds[birdIndex]}");
+
+        return AppCard(
+          title: quiz.quizNames?[titleIndex] ?? "Untitled Quiz",
+          subtitle: quiz.quizDescriptions?[subtitleIndex] ?? "",
+          image: _currentBirds.isNotEmpty ? _currentBirds[birdIndex].birdImages[0].imageURL : "", // fallback if no birds
+          topRightBadge: ("+${quiz.xp}XP" ?? 0).toString(),
+          onTap: () {WidDialog.showDifficultyPicker(context, quiz.quizNames?[titleIndex] ?? "Untitled Quiz", quiz.defaultTotalQuestions, quiz.defaultDurationMins, {'quizType': quiz.quizType});}
+        );
+      }).toList();
+      debugPrint("inside _init() quizAppCards: ${_quizAppCards}");
+      setState(() {});
+    }
   }
 
-  Future<void> startBlitzQuiz() async {
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             } catch (e) {}
                           });
                         },
-                        child: AppSectionTitle(title: "NEAR YOU: $_currentSelectedCity",showViewAll: true,),
+                        child: AppSectionTitle(title: "LATEST SIGHTINGS NEAR: 🌏 $_currentSelectedCity",showViewAll: true,),
                       ),
 
                       ///////////// 2. BIRD CAROUSEL
@@ -146,6 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         subtitle: "Popular content this week",
                         showViewAllLabel: true,
                         showViewAll: true,
+                        onMoreTapRoute: () => _onItemTapped(1),
                       ),
 
                       AppTabContainer(
@@ -158,13 +184,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 height: 200,
                                 cardWidth: 170,
                                 cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaMedium),
-                                cards: [
-                                  AppCard(title: "Sound Quiz", subtitle:"Do you have a good ear?",topLeftBadge:"+50XP", image: "https://picsum.photos/seed/bird9/200/300", ),
-                                  AppCard(title: "Image Quiz", subtitle:"Pehchan kaun!",topLeftBadge:"+150XP", image: "https://picsum.photos/seed/bird2/200/300", ),
-                                  AppCard(title: "Meme Quiz", subtitle:"Kispar hai ye meme?",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird3/200/300", ),
-                                ],
+                                cards: _quizAppCards!,
+                                // [
+                                //   AppCard(title: "Sound Quiz", subtitle:"Do you have a good ear?",topLeftBadge:"+50XP", image: "https://picsum.photos/seed/bird9/200/300", ),
+                                //   AppCard(title: "Image Quiz", subtitle:"Pehchan kaun!",topLeftBadge:"+150XP", image: "https://picsum.photos/seed/bird2/200/300", ),
+                                //   AppCard(title: "Meme Quiz", subtitle:"Kispar hai ye meme?",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird3/200/300", ),
+                                // ],
                               ),
-                            ],                            
+                            ],
                           ),
                           AppTab(label: "Quests",
                             content: [
@@ -228,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     width: cardWidth,
                                     image: "assets/images/cardBg1.webp",
                                     overlayColor: AppColors.colPrimary.withAlpha(AppAlpha.alphaHigh),
-                                    onTap: (){WidDialog.showDifficultyPicker(context);}
+                                    onTap: () {WidDialog.showDifficultyPicker(context, "Blitz Quiz", 10, 2, {'isStandalone': false});}
                                   );
                                 } else {
                                   return AppCard(

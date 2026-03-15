@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/appDesignTokens.dart';
+import 'package:pankh/constants/appTokens.dart';
 import 'wid_uihelper.dart';
 
 class WidPullMenu extends StatelessWidget {

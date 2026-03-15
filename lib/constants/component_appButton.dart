@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pankh/constants/appDesignTokens.dart';
+import 'package:pankh/constants/appTokens.dart';
 
 enum AppButtonVariant { solid, flat, ghost }
 enum AppButtonSize { small, medium, large }
@@ -13,6 +13,9 @@ class AppButton extends StatefulWidget {
   final AppButtonVariant variant;
   final AppButtonSize size;
   final bool isIconOnly;
+  final String? image;
+  final double? height;
+  final double? width;
 
   const AppButton({
     super.key,
@@ -23,6 +26,9 @@ class AppButton extends StatefulWidget {
     this.variant = AppButtonVariant.solid,
     this.size = AppButtonSize.medium,
     this.isIconOnly = false,
+    this.image,
+    this.height,
+    this.width,
 
   });
 
@@ -53,6 +59,10 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   }
 
   double _getHeight() {
+    if (widget.height != null) {
+      return widget.height!;
+    }
+
     switch (widget.size) {
       case AppButtonSize.small: return 32;
       case AppButtonSize.medium: return 44;
@@ -108,15 +118,35 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       return BoxDecoration(
         color: AppColors.colDisabled, // Using your 0xFFBDBDBD token
         borderRadius: BorderRadius.circular(AppSizes.sizeLarge),
+        image: (widget.image != null) ? DecorationImage(
+          image: NetworkImage(widget.image!),
+          fit: BoxFit.cover,
+          // Optional: add a darken filter so text is always readable
+          colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.3),
+              BlendMode.darken
+            ),
+          )
+          : null,
       );
     }
 
     switch (widget.variant) {
       case AppButtonVariant.flat:
         return BoxDecoration(
-          color: AppColors.colSecondary.withAlpha(AppAlpha.alphaLow),
+          color: AppColors.colSecondary.withAlpha(AppAlpha.alphaMedium),
           borderRadius: BorderRadius.circular(AppSizes.sizeLarge),
           boxShadow: AppShadows.shadowSmall,
+          image: (widget.image != null) ? DecorationImage(
+              image: NetworkImage(widget.image!),
+              fit: BoxFit.cover,
+              // Optional: add a darken filter so text is always readable
+              colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.3),
+                  BlendMode.darken
+              ),
+            )
+            : null,
         );
       case AppButtonVariant.ghost:
         return const BoxDecoration();
@@ -126,6 +156,16 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
           color: AppColors.colPrimary,
           borderRadius: BorderRadius.circular(AppSizes.sizeLarge),
           boxShadow: AppShadows.shadowSmall,
+          image: (widget.image != null) ? DecorationImage(
+            image: NetworkImage(widget.image!),
+            fit: BoxFit.cover,
+            // Optional: add a darken filter so text is always readable
+            colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.3),
+                BlendMode.darken
+              ),
+            )
+            : null,
         );
     }
   }
@@ -157,6 +197,9 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
         if (!widget.isIconOnly)
           Text(
             widget.isLoading ? "Processing..." : widget.label,
+            softWrap: true,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: AppTypography.controls.copyWith(
               color: fg,
               fontSize: widget.size == AppButtonSize.small ? 12 : 14,

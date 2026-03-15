@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       await SerSyncFirebaseHive().syncBirds();
 
       // 3. CAROUSEL BIRDS
-      initialBirds = SerBird.getBirds(limitRows: 10);
+      initialBirds = SerBird.getBirds(limitRows: 10, filters:{'hasLore': true, 'hasImage': true} );
 
       try {
         // Performance: Added a timeout to prevent infinite splash hang on poor network
@@ -87,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => HomeScreen(initialBirds)),
         );
       }
     }

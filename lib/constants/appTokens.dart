@@ -261,13 +261,6 @@ class AppDurations {
 // GAMEPLAY
 // ========================
 
-enum QuestionType {
-  image("small"),
-  audio("big");
-  final String optionSize;
-  const QuestionType(this.optionSize);
-}
-
 enum QuizLevel {
   beginner('Beginner', 'P0, P1'),
   hobbyist('Hobbyist', 'P0,P1,P2'),
@@ -277,7 +270,6 @@ enum QuizLevel {
   final String databaseValue; // What Firebase searches for
   const QuizLevel(this.displayText, this.databaseValue);
 }
-
 
 /////////////////////// SHOULD IDEALLY REPLACE WITH HOTSPOTSBIRDMAPPING IN FIREBASE from MONGODB
 enum SupportedCity {

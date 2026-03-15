@@ -4,48 +4,90 @@ import 'ser_birdhive.dart';
 
 class SerBird {
   ////////////////////////
-  // GET HIVE CACHED BIRDS
+  // GET HIVE CACHED BIRDS WITH GENERIC FILTERS
   ////////////////////////
 
   static List<ModBird> getBirds({
     int limitRows = 999,
-    String? filterColumn,
-    dynamic filterValue,
+    Map<String, dynamic>? filters, // 👈 generic filters
   }) {
-    // 1. Get the box (Must be opened with the type <ModBird>)
     var box = Hive.box<ModBird>(SerBirdHive.hiveBirdBox);
-
-    // 2. Get values directly (They are already ModBird objects!)
     List<ModBird> allBirds = box.values.toList();
-
-    // 3. Filtering logic
-    if (filterColumn != null && filterValue != null) {
+    if (filters != null && filters.isNotEmpty) {
       allBirds = allBirds.where((bird) {
+        bool keep = true;
 
-        // Handle 'rank' specifically to allow multiple difficulties
-        if (filterColumn == 'rank') {
-          // If filterValue is a List, check if bird.rank is in it
-          if (filterValue is List) {
-            return filterValue.contains(bird.rank);
+        filters.forEach((key, value) {
+          switch (key) {
+            case 'rank':
+              if (value is List) {
+                keep = keep && value.contains(bird.rank);
+              } else if (value is String && value.contains(',')) {
+                List<String> ranks =
+                value.split(',').map((e) => e.trim()).toList();
+                keep = keep && ranks.contains(bird.rank);
+              } else {
+                keep = keep && bird.rank == value;
+              }
+              break;
+
+            case 'birdID':
+              keep = keep && bird.birdID == value;
+              break;
+
+            case 'hasAudio':
+              final audioExists = bird.birdAudios.isNotEmpty;
+              keep = keep && (value ? audioExists : !audioExists);
+              break;
+
+            case 'hasImage':
+              final imageExists =
+              bird.birdImages.any((img) => img.isFeatured == true);
+              keep = keep && (value ? imageExists : !imageExists);
+              break;
+
+            case 'hasLore':
+              final lore = bird.lore.isNotEmpty;
+              keep = keep && (value ? lore : !lore);
+              break;
+            case 'hasHindiNames':
+              final hindiNames = bird.hindiNames.isNotEmpty;
+              keep = keep && (value ? hindiNames : !hindiNames);
+              break;
+            case 'hasMarathiNames':
+              final marathiNames = bird.marathiNames.isNotEmpty;
+              keep = keep && (value ? marathiNames : !marathiNames);
+              break;
+
+            case 'hasDiet':
+              final diet = bird.birdInfo.diet.isNotEmpty;
+              keep = keep && (value ? diet : !diet);
+              break;
+            case 'hasHabitat':
+              final habitat = bird.birdInfo.habitat.isNotEmpty;
+              keep = keep && (value ? habitat : !habitat);
+              break;
+            case 'hasiucnStatus':
+              final iucnStatus = bird.birdInfo.iucnStatus.isNotEmpty;
+              keep = keep && (value ? iucnStatus : !iucnStatus);
+              break;
+            case 'hasFamily':
+              final family = bird.birdInfo.family.isNotEmpty;
+              keep = keep && (value ? family : !family);
+              break;
+
+            default:
+            // Unknown filter key → ignore
+              break;
           }
-          // If filterValue is a String (like "P0, P1"), split it into a list and check
-          if (filterValue is String && filterValue.contains(',')) {
-            List<String> ranks = filterValue.split(',').map((e) => e.trim()).toList();
-            return ranks.contains(bird.rank);
-          }
-          // Fallback to simple equality
-          return bird.rank == filterValue;
-        }
-
-        // Standard equality for other columns
-        if (filterColumn == 'birdID') return bird.birdID == filterValue;
-
-
-        return true;
+        });
+        return keep;
       }).toList();
     }
-
     allBirds.shuffle();
     return allBirds.take(limitRows).toList();
   }
+
+
+
 }

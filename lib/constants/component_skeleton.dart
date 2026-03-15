@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/appDesignTokens.dart';
+import 'package:pankh/constants/appTokens.dart';
 
 class AppSkeleton extends StatefulWidget {
   final double? width;

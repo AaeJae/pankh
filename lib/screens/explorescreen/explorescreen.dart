@@ -54,6 +54,48 @@ class _ExploreScreenState extends State<ExploreScreen> {
             ),
             const SizedBox(height: AppSizes.sizeSmall),
 
+            // TAB CONTAINER // TODO MAKE STICKY
+            AppTabContainer(
+              isScrollable: false,
+              height: 350,
+              tabs: [
+                AppTab(label: "Quizzes",
+                  content: [
+                    AppCarousel(
+                      height: 200,
+                      cardWidth: 170,
+                      cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaMedium),
+                      cards:
+                      [
+                        AppCard(title: "Sound Quiz", subtitle:"Do you have a good ear?",topLeftBadge:"+50XP", image: "https://picsum.photos/seed/bird9/200/300", ),
+                        AppCard(title: "Image Quiz", subtitle:"Pehchan kaun!",topLeftBadge:"+150XP", image: "https://picsum.photos/seed/bird2/200/300", ),
+                        AppCard(title: "Meme Quiz", subtitle:"Kispar hai ye meme?",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird3/200/300", ),
+                        AppCard(title: "Meme Quiz", subtitle:"Kispar hai ye meme?",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird3/200/300", ),
+                        AppCard(title: "Meme Quiz", subtitle:"Kispar hai ye meme?",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird3/200/300", ),
+                        AppCard(title: "Meme Quiz", subtitle:"Kispar hai ye meme?",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird3/200/300", ),
+                        AppCard(title: "Meme Quiz", subtitle:"Kispar hai ye meme?",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird3/200/300", ),
+                        AppCard(title: "Meme Quiz", subtitle:"Kispar hai ye meme?",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird3/200/300", ),
+                      ],
+                    ),
+                  ],
+                ),
+                AppTab(label: "Quests",
+                  content: [
+                    AppCarousel(
+                      height: 200,
+                      cardWidth: 150,
+                      cardOverlay: AppColors.colPrimary.withAlpha(AppAlpha.alphaMedium),
+                      cards: [
+                        AppCard(title: "Beginners Quest", subtitle:"Get started with Birding",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird5/200/300", ),
+                        AppCard(title: "Hobbyist Quest", subtitle:"Level up",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird8/200/300", ),
+                        AppCard(title: "Expert Quest", subtitle:"God of birding",topLeftBadge:"+250XP", image: "https://picsum.photos/seed/bird9/200/300", ),
+
+                      ],
+                    )
+                  ],
+                ),
+              ],
+            ),
 
             // // 2. QUESTS SECTION
             // AppSection(

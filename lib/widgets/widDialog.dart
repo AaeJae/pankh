@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:pankh/constants/appDesignSystem.dart';
 import 'package:pankh/services/ser_auth.dart';
 import 'package:pankh/services/ser_user.dart';
+import 'package:pankh/widgets/widQuizHelper.dart';
 
 import '../screens/explorescreen/explorescreen.dart';
+import '../screens/homescreen/homescreen.dart';
 import '../screens/quizscreen/quizscreen.dart';
 
 class WidDialog {
@@ -28,9 +30,8 @@ class WidDialog {
   ///////////////////////////////////
   // QUIZ DIALOGS
   ///////////////////////////////////
-  static Future<void> showDifficultyPicker(BuildContext context) async {
+  static Future<void> showDifficultyPicker(BuildContext context, String? quizTitle, int? quizTotalQuestions, int? quizDurationMins, Map<String, dynamic>? quizFilters) async {
     double _tempSliderValue = 0; // Local state for the slider index
-
     await AppDialog.show(
       context,
       title: "Select Difficulty",
@@ -51,11 +52,7 @@ class WidDialog {
                 max: (QuizLevel.values.length - 1).toDouble(),
                 // Map the Enum to display strings for the slider
                 customLabels: QuizLevel.values.map((e) => e.displayText).toList(),
-                onChanged: (newValue) {
-                  setDialogState(() {
-                    _tempSliderValue = newValue;
-                  });
-                },
+                onChanged: (newValue) {setDialogState(() {_tempSliderValue = newValue;});},
               ),
             ],
           );
@@ -66,43 +63,37 @@ class WidDialog {
           label: "Start Quiz",
           variant: AppButtonVariant.solid,
           onPressed: () {
-            // 1. Get the Enum based on slider index
-            final QuizLevel selectedLevel = QuizLevel.values[_tempSliderValue.round()];
-            debugPrint("selcted Level: ${selectedLevel.databaseValue}");
-            // 2. Close the dialog first
-            Navigator.pop(context);
+            final QuizLevel selectedLevel = QuizLevel.values[_tempSliderValue.round()]; // 1. Get the Enum based on slider index
+            Navigator.pop(context); // 2. Close the dialog first
 
-            // 3. Push to QuizScreen passing the Enum object
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => QuizScreen(
-                  difficulty: selectedLevel.databaseValue, // Pass the QuizLevel enum here
-                  onQuit: () => Navigator.pop(context),
-                ),
-              ),
-            );
+            debugPrint("inside widdialog quizFilters: ${quizFilters}");
+
+            WidQuizHelper.navigateToQuiz(context, selectedLevel.databaseValue, quizTitle!, quizTotalQuestions!, quizDurationMins!, quizFilters);
           }
         ),
       ],
     );
   }
   static Future<String?> showResults(
-      BuildContext context,
-      int correct,
-      int total,
-      bool isGuest,
-      ) {
+      BuildContext context, { // Added curly brace here
+        String? title,
+        String? scoreText,
+        int? correct,
+        int? total,
+        bool isGuest = false,
+      }) {
     return AppDialog.show<String>(
       context,
-      title: "Quiz Finished! ✨",
-      isClosable: true,
+      title: title !=null ? title : "Quiz Finished! ✨",
+      isClosable: false,
       subtitle: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("🎊  Final Score: $correct / $total  🎊", style: AppTypography.bodyBold),
+            if (correct != null && total != null) Text("🎊  Final Score: $correct / $total  🎊", style: AppTypography.bodyBold)
+            else if (scoreText != null) Text("🎊  $scoreText  🎊", style: AppTypography.bodyBold),
             const SizedBox(height: AppSizes.sizeSmall),
+
             Text("Keep going!", style: AppTypography.body),
             const SizedBox(height: AppSizes.sizeSmall),
             if(isGuest)
@@ -132,7 +123,7 @@ class WidDialog {
           label: "Explore More Birding!",
           variant: isGuest ? AppButtonVariant.flat : AppButtonVariant.solid,
           size: AppButtonSize.medium,
-          onPressed: () => Navigator.push(context,MaterialPageRoute(builder: (context) => const ExploreScreen(),)),
+          onPressed: () => Navigator.push(context,MaterialPageRoute(builder: (context) => const ExploreScreen())),
         ),
       ],
     );
@@ -162,8 +153,7 @@ class WidDialog {
         ),
       ],
     );
-    if (result == "quit") {
-      Navigator.push(context,MaterialPageRoute(builder: (context) => const ExploreScreen(),));    }
+    if (result == "quit") Navigator.pop(context);
   }
   ///////////////////////////////////
   // AUTH DIALOGS

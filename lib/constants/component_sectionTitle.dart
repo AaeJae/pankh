@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:pankh/constants/appDesignSystem.dart';
 
+import '../screens/explorescreen/explorescreen.dart';
+import '../screens/homescreen/homescreen.dart';
+
 class AppSectionTitle extends StatelessWidget {
   final String title;
   final String? subtitle;
   final bool showViewAllLabel;
   final bool showViewAll;
-  final VoidCallback? onViewAllTap;
+  final VoidCallback? onMoreTapRoute;
 
   const AppSectionTitle({
     super.key,
@@ -14,7 +17,7 @@ class AppSectionTitle extends StatelessWidget {
     this.subtitle, // Removed redundant = null
     this.showViewAllLabel = false,
     this.showViewAll = false,
-    this.onViewAllTap,
+    this.onMoreTapRoute,
   });
 
   @override
@@ -51,35 +54,27 @@ class AppSectionTitle extends StatelessWidget {
                 ),
               ),
 
-              if (showViewAllLabel)
-                Text(
-                  "More",
-                  style: AppTypography.caption.copyWith(fontWeight: FontWeight.bold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              if (showViewAll)
-              // Constraints help with hit-testing and memory
-                SizedBox(
-                  height: AppSizes.sizeMedium, // Standardize tap area
-                  width: AppSizes.sizeMedium,
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: onViewAllTap,
-                    icon: const Icon(
-                      Icons.chevron_right,
-                      color: AppColors.colPrimary,
-                      size: AppSizes.sizeMedium,
-                    ),
+              if (showViewAllLabel || showViewAll)
+                GestureDetector(
+                  onTap: onMoreTapRoute,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showViewAllLabel)
+                        Text("More", style: AppTypography.caption.copyWith(fontWeight: FontWeight.bold,), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      if (showViewAll)
+                        SizedBox(
+                          height: AppSizes.sizeMedium,
+                          width: AppSizes.sizeMedium,
+                          child: const Icon(Icons.chevron_right, color: AppColors.colPrimary, size: AppSizes.sizeMedium),
+                        ),
+                    ],
                   ),
                 ),
             ],
           ),
           if (subtitleWidget != null) subtitleWidget,
-          //Divider(thickness: 0.5, color: AppColors.colPrimary.withAlpha(AppAlpha.alphaLow)),
-
           const SizedBox(height: AppSizes.sizeXSmall),
-
         ],
       ),
     );

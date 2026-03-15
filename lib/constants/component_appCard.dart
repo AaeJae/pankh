@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'appDesignTokens.dart';
+import 'appTokens.dart';
 
 class AppCard extends StatefulWidget {
   final String? title;
@@ -174,7 +174,7 @@ class _AppCardState extends State<AppCard> {
         if (widget.topLeftBadge != null)
           Positioned(top: AppSizes.sizeXSmall, left: AppSizes.sizeXSmall, child: _badge(widget.topLeftBadge!)),
         if (widget.topRightBadge != null)
-          Positioned(top: AppSizes.sizeXSmall, left: AppSizes.sizeXSmall, child: _badge(widget.topRightBadge!)),
+          Positioned(top: AppSizes.sizeXSmall, right: AppSizes.sizeXSmall, child: _badge(widget.topRightBadge!)),
         if (widget.expandedText != null)
           Positioned(bottom: AppSizes.sizeXXSmall,right: AppSizes.sizeXXSmall,
             child: IconButton(
@@ -188,7 +188,7 @@ class _AppCardState extends State<AppCard> {
 
   Widget _badge(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.sizeSmall, vertical: AppSizes.sizeXXSmall),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.sizeXSmall, vertical: AppSizes.sizeXXSmall),
       decoration: BoxDecoration(
         color: AppColors.colTertiary, // Golden Sun
         borderRadius: BorderRadius.circular(AppSizes.sizeCircular),

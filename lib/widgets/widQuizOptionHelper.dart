@@ -23,20 +23,21 @@ class WidQuizOptions extends StatelessWidget {
     bool isSmall = optionSize == "small";
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: AppSizes.screenEdge),
       child: isSmall ? _buildSmallList() : _buildBigGrid(),
     );
+
   }
 
-  // Optimized for Image Questions (Single Column for better visibility)
   Widget _buildSmallList() {
     return Column(
       children: options.map((item) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
-            onTap: () => onOptionSelected(item['name']!),
-            child: _buildSmallOption(item['name']!),
+          padding: const EdgeInsets.only(bottom: AppSizes.sizeMedium),
+          child: AppButton(
+            label: item['name']!,
+            variant: AppButtonVariant.flat,
+            onPressed: () => onOptionSelected(item['name']!),
           ),
         );
       }).toList(),
@@ -75,77 +76,80 @@ class WidQuizOptions extends StatelessWidget {
     );
   }
 
+
   // --- BIG STYLE: Premium Card Aesthetic ---
   Widget _buildBigOption(String name, String imgPath) {
     return Container(
-      height: 150, // CRITICAL: Added fixed height for the Stack to expand into
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha:0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          )
-        ],
+      height: 120, // CRITICAL: Added fixed height for the Stack to expand into
+      child: AppCard(
+        subtitle: name,
+        image: imgPath,
+
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Bird Image background
-            UiHelper.customImage(
-              img: imgPath,
-              fit: BoxFit.cover,
-            ),
-            // Darkening Gradient
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha:0.1),
-                    Colors.black.withValues(alpha:0.7), // Slightly darker for legibility
-                  ],
-                ),
-              ),
-            ),
-            // Label
-            Align( // Using Align instead of Center for bottom-aligned modern look
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: UiHelper.customText(
-                    text: name,
-                    textAlign: TextAlign.center,
-                    color: AppColors.colOnPrimary,
-                    fontSize: AppFontSizes.fontSizeSubtitle, // Use a fixed size if AppFontSizes is failing
-                    fontWeight: FontWeight.normal,
-                    fontFamily: AppTypography.fontSubtitle
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(30),
+      //   boxShadow: [
+      //     BoxShadow(
+      //       color: Colors.black.withValues(alpha:0.1),
+      //       blurRadius: 8,
+      //       offset: const Offset(0, 4),
+      //     )
+      //   ],
+      // ),
+      // child: ClipRRect(
+      //   borderRadius: BorderRadius.circular(30),
+      //   child: Stack(
+      //     fit: StackFit.expand,
+      //     children: [
+      //       // Bird Image background
+      //       UiHelper.customImage(
+      //         img: imgPath,
+      //         fit: BoxFit.cover,
+      //       ),
+      //       // Darkening Gradient
+      //       Container(
+      //         decoration: BoxDecoration(
+      //           gradient: LinearGradient(
+      //             begin: Alignment.topCenter,
+      //             end: Alignment.bottomCenter,
+      //             colors: [
+      //               Colors.black.withValues(alpha:0.1),
+      //               Colors.black.withValues(alpha:0.7), // Slightly darker for legibility
+      //             ],
+      //           ),
+      //         ),
+      //       ),
+      //       // Label
+      //       Align( // Using Align instead of Center for bottom-aligned modern look
+      //         alignment: Alignment.bottomCenter,
+      //         child: Padding(
+      //           padding: const EdgeInsets.all(12.0),
+      //           child: UiHelper.customText(
+      //               text: name,
+      //               textAlign: TextAlign.center,
+      //               color: AppColors.colOnPrimary,
+      //               fontSize: AppFontSizes.fontSizeSubtitle, // Use a fixed size if AppFontSizes is failing
+      //               fontWeight: FontWeight.normal,
+      //               fontFamily: AppTypography.fontSubtitle
+      //           ),
+      //         ),
+      //       ),
+      //     ],
+
+
     );
   }
 
   // --- SMALL STYLE: Elegant "Pill" Buttons ---
   Widget _buildSmallOption(String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0), // Space between pills
+      padding: const EdgeInsets.symmetric(vertical: AppSizes.sizeXXXSmall), // Space between pills
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(
-          vertical: 15.0,   // Increase this value to make pills thicker
-          horizontal: 15.0,
-        ),
+        padding: const EdgeInsets.all(AppSizes.sizeSmall),
         decoration: BoxDecoration(
-          color: AppColors.colSecondary.withValues(alpha:0.7),
-          borderRadius: BorderRadius.circular(30), // Keeps the "pill" shape
+          color: AppColors.colSecondary.withAlpha(AppAlpha.alphaHigh),
+          borderRadius: BorderRadius.circular(AppSizes.sizeLarge), // Keeps the "pill" shape
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha:0.2),

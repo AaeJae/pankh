@@ -99,6 +99,14 @@ class ModBird extends HiveObject {
         ? birdImages.first
         : BirdImage(imageURL: '', isFeatured: false, source: 'Unknown',  sourceCreator: 'Unknown', sourceCreatorFull: 'Unknown', sourceLicense: 'Unknown'),
   );
+
+  String? get diet => birdInfo.diet;
+  String? get habitat => birdInfo.habitat;
+  String? get family => birdInfo.family;
+  String? get iucnStatus => birdInfo.iucnStatus;
+  String? get name => birdName;
+
+
 }
 
 @HiveType(typeId: 1)

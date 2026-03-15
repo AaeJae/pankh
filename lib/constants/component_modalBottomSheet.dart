@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/appDesignTokens.dart';
+import 'package:pankh/constants/appTokens.dart';
 
 enum AppSheetVariant { defaultList, tabbed }
 
@@ -30,12 +30,12 @@ class AppSheet {
 
   // Helper for List Variant
   static Widget buildListItem({
-    required IconData icon,
+    IconData? icon,
     required String text,
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.colSecondary),/**/
+      leading: icon!=null ? Icon(icon, color: AppColors.colSecondary) : null,
       title: Text(text, style: AppTypography.body),
       trailing: const Icon(
           Icons.chevron_right, size: 20, color: AppColors.colPrimary),

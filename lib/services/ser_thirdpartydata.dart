@@ -27,13 +27,27 @@ class ThirdPartyDataService {
         debugPrint("--------------------ebirdBird50NearbySet: ${nearbyCodes.length}");
 
         final box = Hive.box<ModBird>(SerBirdHive.hiveBirdBox);
-
+        
         final matchedBirds = box.values.where((bird) {
-          return nearbyCodes.contains(bird.eBirdCode.toLowerCase());
+          return nearbyCodes.contains(bird.eBirdCode.toLowerCase()) && bird.birdImages.isNotEmpty && bird.lore.trim().isNotEmpty;;
         }).toList();
         debugPrint("--------------------matched Set: ${matchedBirds.length}");
         matchedBirds.shuffle();
-        return matchedBirds.take(10).toList();
+        matchedBirds.take(10).toList();
+
+        for (var bird in matchedBirds) {
+          debugPrint('--- Bird Found ---');
+          debugPrint('Name: ${bird.birdName}');
+          debugPrint('Lore: ${bird.lore.substring(0, bird.lore.length > 50 ? 50 : bird.lore.length)}...'); // Prints first 50 chars
+
+          if (bird.birdImages.isNotEmpty) {
+            debugPrint('Image URL: ${bird.birdImages[0].imageURL}');
+          } else {
+            debugPrint('Image: No images available');
+          }
+        }
+
+        return matchedBirds;
       }
     }
     catch (e) {

@@ -1,24 +1,33 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:pankh/constants/appDesignTokens.dart';
-import 'package:pankh/widgets/widQuizHelper.dart';
-
 import 'package:pankh/constants/appDesignSystem.dart';
-import '../../widgets/wid_uihelper.dart';
+import 'package:pankh/widgets/widQuizHelper.dart';
+import '../../widgets/widDialog.dart';
 
-class BinocsSpotterScreen extends StatefulWidget {
-  const BinocsSpotterScreen({super.key});
+class BinocsScreen extends StatefulWidget {
+  final String? quizTitle;
+  final int? quizDurationMins;
+  final Map<String, dynamic>? quizFilters;
+  final Map<String, dynamic>? birdFilters;
+  final VoidCallback onQuit;
+
+  const BinocsScreen({super.key,
+    this.quizTitle = "Binocs Spotter Quiz",
+    this.quizDurationMins = 2,
+    this.quizFilters,
+    this.birdFilters = const {'hasBinocsImage': true},
+    required this.onQuit});
 
   @override
-  State<BinocsSpotterScreen> createState() => _BinocsSpotterScreenState();
+  State<BinocsScreen> createState() => _BinocsScreenState();
 }
 
-class _BinocsSpotterScreenState extends State<BinocsSpotterScreen> {
+class _BinocsScreenState extends State<BinocsScreen> {
   final TransformationController _transformController = TransformationController();
 
   // Game Configuration
-  final double apertureRadius = 200.0;
+  final double apertureRadius = 120.0;
   final Offset correctLocation = const Offset(400, 300); // was 800, 560
   final String correctBirdName = "SHIKRA";
 
@@ -32,6 +41,7 @@ class _BinocsSpotterScreenState extends State<BinocsSpotterScreen> {
   @override
   void initState() {
     super.initState();
+    _secondsLeft = widget.quizDurationMins! * 60;
     _transformController.value = Matrix4.identity()..scale(1.5);
     _startTimer();
   }
@@ -41,12 +51,41 @@ class _BinocsSpotterScreenState extends State<BinocsSpotterScreen> {
       if (_secondsLeft > 0 && !_gameEnded) {
         setState(() => _secondsLeft--);
       } else {
-        _timer?.cancel();
-        // Handle timeout logic here
+        timer.cancel();
+        if (!_gameEnded) _onFinish("timeout");
       }
     });
   }
 
+  void _onFinish(String result) async {
+    if (_gameEnded) return;
+    setState(() => _gameEnded = true);
+    _timer?.cancel();
+
+    int timeTaken = ((widget.quizDurationMins ?? 2) * 60) - _secondsLeft;
+    bool isWin = result == "win";
+
+    final action = await WidDialog.showResults(
+      context,
+      title: isWin ? "Target Acquired! 🎯" : "Bird Flew Away! 🦅",
+      scoreText: isWin
+          ? "Excellent spotting! Time: ${WidQuizHelper.formatTime(Duration(seconds: timeTaken))}"
+          : "You ran out of time. Better luck next time!",
+      isGuest: false,
+    );
+
+    action == "restart" ? _resetGame() : widget.onQuit();
+  }
+  void _resetGame() {
+    setState(() {
+      _secondsLeft = (widget.quizDurationMins ?? 2) * 60;
+      _gameEnded = false;
+      _spotlightPos = null;
+      _sliderValue = 0.0;
+      _transformController.value = Matrix4.identity()..scale(1.5);
+    });
+    _startTimer();
+  }
   @override
   void dispose() {
     _timer?.cancel();
@@ -116,33 +155,20 @@ class _BinocsSpotterScreenState extends State<BinocsSpotterScreen> {
 
           // 3. UI OVERLAY
           SafeArea(
-            child: Column(
-              children: [
-                _buildTopTimer(),
-                const Spacer(),
-                if (_spotlightPos == null) _buildInstructionText(),
-                _buildControls(),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.screenEdge,),
+              child: Column(
+                children: [
+                  WidQuizHelper.buildTopHeader(context, widget.quizTitle!),
+
+                  WidQuizHelper.infoChip("Time before the bird flies: ${WidQuizHelper.formatTime(Duration(seconds: _secondsLeft))}"),
+                  const Spacer(),
+                  if (_spotlightPos == null) _buildInstructionText(),
+                  _buildControls(),
+                ],
+              ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTopTimer() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text("Time before bird flies: ",
-              style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 5),
-          // WidQuizHelper.infoChip(
-          //   WidQuizHelper.formatTime(Duration(seconds: _secondsLeft)),
-          //   color: _secondsLeft < 10 ? Colors.red : Colors.black45,
-          // ),
         ],
       ),
     );
@@ -163,43 +189,55 @@ class _BinocsSpotterScreenState extends State<BinocsSpotterScreen> {
 
   Widget _buildControls() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
+      padding: const EdgeInsets.only(bottom: AppSizes.sizeMedium),
       child: Column(
         children: [
           const Text("FOCUS BINOCULARS", style: TextStyle(color: Colors.white, fontSize: 10, letterSpacing: 2)),
-          Slider(
+          AppSlider(
+            label: "Focus Binoculars",
             value: _sliderValue,
-            min: 0, max: 20,
-            activeColor: AppColors.colOnTertiary,
-            onChanged: (val) => setState(() => _sliderValue = val),
+            min: 0,
+            max: 20,
+            divisions: 20, // Snaps to exactly 10 intervals
+            onChanged: (val) {setState(() => _sliderValue = val);},
           ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity, // Matches slider width
-            height: 55,
-            child: ElevatedButton(
-              onPressed: _spotlightPos == null ? null : _showBirdSelectionModal,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.colPrimary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text("CONFIRM SIGHTING", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ),
+          const SizedBox(height: AppSizes.sizeSmall),
+          AppButton(
+            label: "CONFIRM SIGHTING",
+            variant: AppButtonVariant.solid, // Or outline based on your system
+            onPressed: _spotlightPos == null ? null : _showBirdSelectionModal,
           ),
+
         ],
       ),
     );
   }
 
   void _showBirdSelectionModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
-      builder: (context) => _BirdSearchModal(
-        onSelect: (selectedName) => _validateWin(selectedName),
-      ),
+    AppSheet.show(
+      context,
+      title: "Which bird do you see?",
+      variant: AppSheetVariant.defaultList,
+      items: [
+        AppSheet.buildListItem(
+          icon: Icons.visibility,
+          text: "Shikra",
+          onTap: () {
+            Navigator.pop(context);
+            _validateWin("Shikra");
+          },
+        ),
+        AppSheet.buildListItem(
+          icon: Icons.visibility,
+          text: "Kingfisher",
+          onTap: () {
+            Navigator.pop(context);
+            _validateWin("Kingfisher");
+          },
+        ),
+      ],
     );
+
   }
 
   void _validateWin(String name) {
@@ -223,66 +261,65 @@ class _BinocsSpotterScreenState extends State<BinocsSpotterScreen> {
     print("Current Zoom: ${currentZoom.toStringAsFixed(2)}x");
     print("Distance to Bird: ${distance.toStringAsFixed(2)}");
     print("Allowed Radius (with margin): ${dynamicWinningRadius.toStringAsFixed(2)}");
-
+    bool isFocused = _sliderValue > 15.0;
     bool isCorrectSpot = distance <= dynamicWinningRadius;
     bool isCorrectName = name.toUpperCase() == correctBirdName;
-    if (isCorrectSpot && isCorrectName) {
-      setState(() => _gameEnded = true);
-      //ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("BIRD SPOTTED! YOU WIN!")));
 
-      // SUCCESS DIALOG
-      // WidDialog.customDialog(
-      //   context,
-      //   "TARGET ACQUIRED!",
-      //   Column(
-      //     mainAxisSize: MainAxisSize.min,
-      //     children: [
-      //       const Icon(Icons.auto_awesome, color: Colors.white, size: 50),
-      //       const SizedBox(height: 15),
-      //       UiHelper.customText(
-      //         text: "Excellent eye! You spotted the $correctBirdName.",
-      //         color: Colors.white,
-      //         textAlign: TextAlign.center,
-      //         fontSize: AppFontSizes.fontSizeBody,
-      //       ),
-      //     ],
-      //   ),
-      //   [
-      //     DialogPill(label: "Collect XP", action: "collect_reward"),
-      //   ],
-      //   canClose: false,
-      // ).then((action) {
-      //   if (action == "collect_reward") Navigator.pop(context);
-      // });
-
+    if (isCorrectSpot && isCorrectName && isFocused) {
+      _onFinish("win");
     } else {
-      //ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Not quite right. Keep looking!")));
-      // FAILURE DIALOG
-      // WidDialog.customDialog(
-      //   context,
-      //   "NOT QUITE...",
-      //   Column(
-      //     mainAxisSize: MainAxisSize.min,
-      //     children: [
-      //       const Icon(Icons.search_off, color: Colors.white, size: 50),
-      //       const SizedBox(height: 15),
-      //       UiHelper.customText(
-      //         text: !isCorrectSpot
-      //             ? "The bird isn't in your viewfinder."
-      //             : "Bird spotted, but it's not ${name}",
-      //         color: Colors.white,
-      //         textAlign: TextAlign.center,
-      //         fontSize: AppFontSizes.fontSizeBody,
-      //       ),
-      //     ],
-      //   ),
-      //   [
-      //     DialogPill(label: "Try Again", action: "retry"),
-      //   ],
-      //   canClose: true,
-      // );
+      String feedback = !isFocused
+          ? "The lens is too blurry to be sure!"
+          : (!isCorrectSpot ? "Nothing but leaves there..." : "That's not a $name!");
 
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(feedback), duration: const Duration(seconds: 2))
+      );
     }
+
+
+    //
+    // if (isCorrectSpot && isCorrectName) {
+    //   _onFinish("win");
+    //   //ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("BIRD SPOTTED! YOU WIN!")));
+    //
+    //   // SUCCESS DIALOG
+    //   // WidDialog.customDialog(
+    //   //   context,
+    //   //   "TARGET ACQUIRED!",
+    //   //   Column(
+    //   //     mainAxisSize: MainAxisSize.min,
+    //   //     children: [
+    //   //       const Icon(Icons.auto_awesome, color: Colors.white, size: 50),
+    //   //       const SizedBox(height: 15),
+    //   //       UiHelper.customText(
+    //   //         text: "Excellent eye! You spotted the $correctBirdName.",
+    //   //         color: Colors.white,
+    //   //         textAlign: TextAlign.center,
+    //   //         fontSize: AppFontSizes.fontSizeBody,
+    //   //       ),
+    //   //     ],
+    //   //   ),
+    //   //   [
+    //   //     DialogPill(label: "Collect XP", action: "collect_reward"),
+    //   //   ],
+    //   //   canClose: false,
+    //   // ).then((action) {
+    //   //   if (action == "collect_reward") Navigator.pop(context);
+    //   // });
+    //
+    // } else {
+    //   String feedback = !isFocused
+    //       ? "The lens is too blurry to be sure!"
+    //       : (!isCorrectSpot ? "Nothing but leaves there..." : "That's not a $name!");
+    //
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(content: Text(feedback), duration: const Duration(seconds: 2))
+    //   );
+    //
+    // }
+
+
   }
 }
 

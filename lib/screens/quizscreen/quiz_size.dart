@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:pankh/constants/appDesignSystem.dart';
 import 'package:pankh/widgets/wid_uihelper.dart';
 
-class SizeMattersScreen extends StatefulWidget {
-  const SizeMattersScreen({super.key});
+class QuizSizeScreen extends StatefulWidget {
+  const QuizSizeScreen({super.key});
 
   @override
-  State<SizeMattersScreen> createState() => _SizeMattersScreenState();
+  State<QuizSizeScreen> createState() => _QuizSizeScreenState();
 }
 
-class _SizeMattersScreenState extends State<SizeMattersScreen> {
+class _QuizSizeScreenState extends State<QuizSizeScreen> {
   // CONFIGURATION
   // A Red-vented Bulbul is ~20cm, a Phone is ~16cm.
   // So the Bulbul should be ~1.25x the height of the phone.
