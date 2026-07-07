@@ -1,5 +1,6 @@
-🪶 Pankh App
-Pankh is a gamified birding companion app built for India’s birdwatching community. It preserves local bird lores, connects enthusiasts with real‑time sightings, and makes learning fun through quizzes, challenges, and community engagement.
+🪶 PANKH
+
+Pankh is a gamified birding companion app built for India’s birdwatching community. It educates about ornithology, preserves local bird lores, connects enthusiasts with real‑time sightings, and makes learning fun through quizzes, challenges, and community engagement.
 
 KEY FEATURES
 Gamification
